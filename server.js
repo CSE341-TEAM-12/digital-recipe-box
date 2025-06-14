@@ -4,14 +4,14 @@ const routes = require("./routes")
 // Remove commenst as feature is added(but they are already in package.json)
 // const bodyParser = require('body-parser');
 // const cors = require('cors');
-const connectDB = require('./config/db');
+const db = require('./config/db');
 require('dotenv').config();
 
 const app = express();
 
 
 // Connect to MongoDB
-connectDB();
+db.connectDB();
 
 // Middleware
 // app.use();
