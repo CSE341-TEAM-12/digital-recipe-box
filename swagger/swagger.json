@@ -1,0 +1,359 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Digital Recipe Box API",
+    "description": "REST API for Digital Recipe Box - A comprehensive recipe management system",
+    "version": "1.0.0"
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Recipes",
+      "description": "Recipe management endpoints"
+    },
+    {
+      "name": "Cookbooks",
+      "description": "Cookbook management endpoints"
+    },
+    {
+      "name": "Reviews",
+      "description": "Recipe review endpoints"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/recipes/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recipes/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/cookbooks/": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/cookbooks/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/reviews/recipe/{recipeId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Recipe": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Recipe Title"
+        },
+        "description": {
+          "type": "string",
+          "example": "Recipe description"
+        },
+        "ingredients": {
+          "type": "array",
+          "example": [
+            "ingredient 1",
+            "ingredient 2"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "instructions": {
+          "type": "array",
+          "example": [
+            "step 1",
+            "step 2"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "cookingTime": {
+          "type": "number",
+          "example": 30
+        },
+        "servings": {
+          "type": "number",
+          "example": 4
+        },
+        "category": {
+          "type": "string",
+          "example": "Main Course"
+        },
+        "isPublic": {
+          "type": "boolean",
+          "example": true
+        },
+        "createdBy": {
+          "type": "string",
+          "example": "user_id"
+        }
+      }
+    },
+    "Cookbook": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Cookbook Title"
+        },
+        "description": {
+          "type": "string",
+          "example": "Cookbook description"
+        },
+        "recipes": {
+          "type": "array",
+          "example": [
+            "recipe_id_1",
+            "recipe_id_2"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "isPublic": {
+          "type": "boolean",
+          "example": true
+        },
+        "createdBy": {
+          "type": "string",
+          "example": "user_id"
+        }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "properties": {
+        "recipeId": {
+          "type": "string",
+          "example": "recipe_id"
+        },
+        "rating": {
+          "type": "number",
+          "example": 5
+        },
+        "comment": {
+          "type": "string",
+          "example": "Great recipe!"
+        },
+        "reviewedBy": {
+          "type": "string",
+          "example": "user_id"
+        }
+      }
+    }
+  }
+}
