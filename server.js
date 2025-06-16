@@ -1,24 +1,27 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
 const routes = require("./routes")
-
-// Remove commenst as feature is added(but they are already in package.json)
-// const bodyParser = require('body-parser');
-// const cors = require('cors');
 const db = require('./config/db');
 require('dotenv').config();
 
 const app = express();
 
-
 // Connect to MongoDB
 db.connectDB();
 
 // Middleware
-// app.use();
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Swagger Documentation
+const swaggerDocument = require('./swagger/swagger.json');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes 
 app.use("/", routes)
-
 
 const PORT = process.env.PORT || 5000;
 
