@@ -1,38 +1,56 @@
-// Authentication middleware
-// For now, this is a placeholder until OAuth is fully implemented
-// In a real implementation, you would verify JWT tokens or session cookies
+// Authentication middleware for Google OAuth
+// This middleware checks if user is authenticated via Google OAuth session
 
 const authenticateUser = (req, res, next) => {
-  // For development purposes, we'll simulate an authenticated user
-  // In production, you would verify the token from the Authorization header
-  
+  // Check if user is authenticated via passport session
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    // User is authenticated via OAuth session
+    return next();
+  }
+
+  // Check for development/testing purposes - allow Bearer token for API testing
   const authHeader = req.headers.authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ 
-      error: 'Access denied. No token provided.' 
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    
+    // For testing purposes only - remove in production
+    if (token === 'test-token' && process.env.NODE_ENV !== 'production') {
+      // Simulated user for testing
+      req.user = {
+        _id: '507f1f77bcf86cd799439011', // Mock ObjectId
+        oauthId: 'test-oauth-id',
+        displayName: 'Test User',
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        profileImageUrl: 'https://via.placeholder.com/150'
+      };
+      return next();
+    }
+  }
+
+  // User is not authenticated
+  return res.status(401).json({ 
+    error: 'Authentication required. Please log in with Google.',
+    loginUrl: '/auth/google'
+  });
+};
+
+// Middleware to ensure user is logged out
+const ensureLoggedOut = (req, res, next) => {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return res.status(400).json({
+      error: 'User is already logged in',
+      user: {
+        displayName: req.user.displayName,
+        email: req.user.email
+      }
     });
   }
-  
-  // In a real implementation, you would decode and verify the JWT token
-  // For now, we'll simulate a user ID
-  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-  
-  if (token === 'test-token') {
-    // Simulated user for testing
-    req.user = {
-      id: '507f1f77bcf86cd799439011', // Mock ObjectId
-      displayName: 'Test User',
-      email: 'test@example.com'
-    };
-    next();
-  } else {
-    return res.status(401).json({ 
-      error: 'Invalid token.' 
-    });
-  }
+  next();
 };
 
 module.exports = {
-  authenticateUser
+  authenticateUser,
+  ensureLoggedOut
 }; 

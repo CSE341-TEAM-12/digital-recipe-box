@@ -6,20 +6,15 @@ const cookbook = require("./cookbook.js");
 const review = require("./review.js");
 const user = require("./user.js");
 
-
-
-
 mongoose.Promise = global.Promise;
 
 const db = {
     mongoose : mongoose,
     url :  dbConfig.url,
-    Recipe: recipe(mongoose),
-    Cookbook: cookbook(mongoose),
-    Review: review(mongoose),
-    User: user(mongoose)
-
+    recipes: recipe(mongoose),
+    cookbooks: cookbook(mongoose),
+    reviews: review(mongoose),
+    users: user(mongoose)
 };
-
 
 module.exports = db;

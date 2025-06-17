@@ -5,14 +5,14 @@ const createCookbook = async (req, res) => {
   try {
     const cookbookData = {
       ...req.body,
-      ownerId: req.user.id // From authentication middleware
+      ownerId: req.user._id // From authentication middleware (Google OAuth)
     };
 
-    const cookbook = new db.Cookbook(cookbookData);
+    const cookbook = new db.cookbooks(cookbookData);
     const savedCookbook = await cookbook.save();
 
     // Populate owner and recipe information
-    const populatedCookbook = await db.Cookbook.findById(savedCookbook._id)
+    const populatedCookbook = await db.cookbooks.findById(savedCookbook._id)
       .populate('ownerId', 'displayName firstName lastName')
       .populate('recipeIds', 'title description isPublic');
 
@@ -40,7 +40,7 @@ const createCookbook = async (req, res) => {
 // Get all cookbooks owned by the logged-in user
 const getUserCookbooks = async (req, res) => {
   try {
-    const cookbooks = await db.Cookbook.find({ ownerId: req.user.id })
+    const cookbooks = await db.cookbooks.find({ ownerId: req.user._id })
       .populate('ownerId', 'displayName firstName lastName')
       .populate('recipeIds', 'title description isPublic')
       .sort({ createdAt: -1 });
@@ -62,7 +62,7 @@ const getUserCookbooks = async (req, res) => {
 // Get a single cookbook by ID
 const getCookbookById = async (req, res) => {
   try {
-    const cookbook = await db.Cookbook.findById(req.params.id)
+    const cookbook = await db.cookbooks.findById(req.params.id)
       .populate('ownerId', 'displayName firstName lastName')
       .populate('recipeIds', 'title description isPublic creatorId');
 
@@ -73,7 +73,7 @@ const getCookbookById = async (req, res) => {
     }
 
     // Check if user is the owner
-    if (cookbook.ownerId._id.toString() !== req.user.id) {
+    if (cookbook.ownerId._id.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         error: 'Access denied. You can only access your own cookbooks.'
       });

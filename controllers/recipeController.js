@@ -5,14 +5,14 @@ const createRecipe = async (req, res) => {
   try {
     const recipeData = {
       ...req.body,
-      creatorId: req.user.id // From authentication middleware
+      creatorId: req.user._id // From authentication middleware (Google OAuth)
     };
 
-    const recipe = new db.Recipe(recipeData);
+    const recipe = new db.recipes(recipeData);
     const savedRecipe = await recipe.save();
 
     // Populate creator information
-    const populatedRecipe = await db.Recipe.findById(savedRecipe._id)
+    const populatedRecipe = await db.recipes.findById(savedRecipe._id)
       .populate('creatorId', 'displayName firstName lastName');
 
     res.status(201).json({
@@ -39,7 +39,7 @@ const createRecipe = async (req, res) => {
 // Get all public recipes
 const getPublicRecipes = async (req, res) => {
   try {
-    const recipes = await db.Recipe.find({ isPublic: true })
+    const recipes = await db.recipes.find({ isPublic: true })
       .populate('creatorId', 'displayName firstName lastName')
       .sort({ createdAt: -1 });
 
@@ -60,7 +60,7 @@ const getPublicRecipes = async (req, res) => {
 // Get a single recipe by ID
 const getRecipeById = async (req, res) => {
   try {
-    const recipe = await db.Recipe.findById(req.params.id)
+    const recipe = await db.recipes.findById(req.params.id)
       .populate('creatorId', 'displayName firstName lastName');
 
     if (!recipe) {
@@ -70,7 +70,7 @@ const getRecipeById = async (req, res) => {
     }
 
     // Check if recipe is public or if user is the creator
-    if (!recipe.isPublic && recipe.creatorId._id.toString() !== req.user?.id) {
+    if (!recipe.isPublic && recipe.creatorId._id.toString() !== req.user?._id.toString()) {
       return res.status(403).json({
         error: 'Access denied. This recipe is private.'
       });

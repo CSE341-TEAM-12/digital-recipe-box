@@ -4,7 +4,7 @@ const db = require('../models');
 const createReview = async (req, res) => {
   try {
     // Check if the recipe exists and is public
-    const recipe = await db.Recipe.findById(req.params.recipeId);
+    const recipe = await db.recipes.findById(req.params.recipeId);
     
     if (!recipe) {
       return res.status(404).json({
@@ -19,8 +19,8 @@ const createReview = async (req, res) => {
     }
 
     // Check if user already reviewed this recipe
-    const existingReview = await db.Review.findOne({
-      reviewerId: req.user.id,
+    const existingReview = await db.reviews.findOne({
+      reviewerId: req.user._id,
       recipeId: req.params.recipeId
     });
 
@@ -32,15 +32,15 @@ const createReview = async (req, res) => {
 
     const reviewData = {
       ...req.body,
-      reviewerId: req.user.id,
+      reviewerId: req.user._id,
       recipeId: req.params.recipeId
     };
 
-    const review = new db.Review(reviewData);
+    const review = new db.reviews(reviewData);
     const savedReview = await review.save();
 
     // Populate reviewer and recipe information
-    const populatedReview = await db.Review.findById(savedReview._id)
+    const populatedReview = await db.reviews.findById(savedReview._id)
       .populate('reviewerId', 'displayName firstName lastName')
       .populate('recipeId', 'title description');
 
@@ -69,7 +69,7 @@ const createReview = async (req, res) => {
 const getReviewsByRecipeId = async (req, res) => {
   try {
     // Check if the recipe exists and is public
-    const recipe = await db.Recipe.findById(req.params.recipeId);
+    const recipe = await db.recipes.findById(req.params.recipeId);
     
     if (!recipe) {
       return res.status(404).json({
@@ -77,13 +77,13 @@ const getReviewsByRecipeId = async (req, res) => {
       });
     }
 
-    if (!recipe.isPublic && recipe.creatorId.toString() !== req.user?.id) {
+    if (!recipe.isPublic && recipe.creatorId.toString() !== req.user?._id.toString()) {
       return res.status(403).json({
         error: 'Cannot view reviews for a private recipe'
       });
     }
 
-    const reviews = await db.Review.find({ recipeId: req.params.recipeId })
+    const reviews = await db.reviews.find({ recipeId: req.params.recipeId })
       .populate('reviewerId', 'displayName firstName lastName')
       .sort({ createdAt: -1 });
 

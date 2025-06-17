@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "Digital Recipe Box API",
-    "description": "REST API for Digital Recipe Box - A comprehensive recipe management system",
+    "description": "REST API for Digital Recipe Box - A comprehensive recipe management system with Google OAuth authentication",
     "version": "1.0.0",
     "contact": {
       "name": "CSE341 Team-12",
@@ -14,6 +14,14 @@
     {
       "name": "General",
       "description": "General API endpoints and information"
+    },
+    {
+      "name": "Authentication",
+      "description": "Google OAuth authentication endpoints - Login, logout, and authentication status"
+    },
+    {
+      "name": "Users",
+      "description": "User management endpoints - Get user profile and user recipes"
     },
     {
       "name": "Recipes",
@@ -33,11 +41,21 @@
     "http"
   ],
   "securityDefinitions": {
+    "googleAuth": {
+      "type": "oauth2",
+      "authorizationUrl": "/auth/google",
+      "flow": "implicit",
+      "scopes": {
+        "profile": "Access to user profile information",
+        "email": "Access to user email address"
+      },
+      "description": "Google OAuth 2.0 authentication. Use /auth/google to initiate login flow."
+    },
     "bearerAuth": {
       "type": "apiKey",
       "name": "Authorization",
       "in": "header",
-      "description": "JWT token for authentication. Format: Bearer {token}"
+      "description": "JWT token for authentication. Format: Bearer {token} (For testing purposes only)"
     }
   },
   "consumes": [
@@ -49,522 +67,1696 @@
   "paths": {
     "/": {
       "get": {
-        "tags": ["General"],
-        "summary": "API Welcome Message",
-        "description": "Returns a welcome message for the Digital Recipe Box API",
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Welcome message returned successfully",
+            "description": "OK",
             "schema": {
-              "type": "string",
-              "example": "Welcome to Digital Recipe Box API"
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Welcome to Digital Recipe Box API"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "description": "",
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/login/success": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/auth/login/failed": {
+      "get": {
+        "description": "",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/status": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{id}/recipes": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/recipes/": {
       "get": {
-        "tags": ["Recipes"],
-        "summary": "Get all public recipes",
-        "description": "Retrieve all publicly available recipes",
+        "description": "",
         "responses": {
           "200": {
-            "description": "List of recipes retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Public recipes retrieved successfully" },
-                "count": { "type": "number", "example": 2 },
-                "recipes": {
-                  "type": "array",
-                  "items": { "$ref": "#/definitions/Recipe" }
-                }
-              }
-            }
+            "description": "OK"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
           }
         }
       },
       "post": {
-        "tags": ["Recipes"],
-        "summary": "Create a new recipe",
-        "description": "Create a new recipe with ingredients and instructions. Requires authentication.",
-        "security": [{"bearerAuth": []}],
+        "description": "",
         "parameters": [
           {
             "name": "authorization",
             "in": "header",
-            "type": "string",
-            "description": "Bearer token for authentication"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Recipe data",
-            "required": true,
-            "schema": { "$ref": "#/definitions/RecipeInput" }
+            "type": "string"
           }
         ],
         "responses": {
           "201": {
-            "description": "Recipe created successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Recipe created successfully" },
-                "recipe": { "$ref": "#/definitions/Recipe" }
-              }
-            }
+            "description": "Created"
           },
           "400": {
-            "description": "Bad Request - Validation Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Bad Request"
           },
           "401": {
-            "description": "Unauthorized - Authentication required",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Unauthorized"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/recipes/{id}": {
       "get": {
-        "tags": ["Recipes"],
-        "summary": "Get recipe by ID",
-        "description": "Get a specific recipe by its ID. Public recipes can be accessed by anyone.",
+        "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string",
-            "description": "Recipe ID"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Recipe retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Recipe retrieved successfully" },
-                "recipe": { "$ref": "#/definitions/Recipe" }
-              }
-            }
+            "description": "OK"
           },
           "403": {
-            "description": "Forbidden - Access denied for private recipe",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Forbidden"
           },
           "404": {
-            "description": "Not Found - Recipe not found",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Not Found"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/cookbooks/": {
       "get": {
-        "tags": ["Cookbooks"],
-        "summary": "Get user cookbooks",
-        "description": "Get all cookbooks owned by the authenticated user",
-        "security": [{"bearerAuth": []}],
+        "description": "",
         "parameters": [
           {
             "name": "authorization",
             "in": "header",
-            "type": "string",
-            "description": "Bearer token for authentication"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Cookbooks retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "User cookbooks retrieved successfully" },
-                "count": { "type": "number", "example": 1 },
-                "cookbooks": {
-                  "type": "array",
-                  "items": { "$ref": "#/definitions/Cookbook" }
-                }
-              }
-            }
+            "description": "OK"
           },
           "401": {
-            "description": "Unauthorized - Authentication required",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Unauthorized"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
           }
         }
       },
       "post": {
-        "tags": ["Cookbooks"],
-        "summary": "Create a new cookbook",
-        "description": "Create a new cookbook with name, description, and recipe collection",
-        "security": [{"bearerAuth": []}],
+        "description": "",
         "parameters": [
           {
             "name": "authorization",
             "in": "header",
-            "type": "string",
-            "description": "Bearer token for authentication"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Cookbook data",
-            "required": true,
-            "schema": { "$ref": "#/definitions/CookbookInput" }
+            "type": "string"
           }
         ],
         "responses": {
           "201": {
-            "description": "Cookbook created successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Cookbook created successfully" },
-                "cookbook": { "$ref": "#/definitions/Cookbook" }
-              }
-            }
+            "description": "Created"
           },
           "400": {
-            "description": "Bad Request - Validation Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Bad Request"
           },
           "401": {
-            "description": "Unauthorized - Authentication required",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Unauthorized"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/cookbooks/{id}": {
       "get": {
-        "tags": ["Cookbooks"],
-        "summary": "Get cookbook by ID",
-        "description": "Get a specific cookbook by its ID. User must be the owner.",
-        "security": [{"bearerAuth": []}],
+        "description": "",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string",
-            "description": "Cookbook ID"
+            "type": "string"
           },
           {
             "name": "authorization",
             "in": "header",
-            "type": "string",
-            "description": "Bearer token for authentication"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Cookbook retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Cookbook retrieved successfully" },
-                "cookbook": { "$ref": "#/definitions/Cookbook" }
-              }
-            }
+            "description": "OK"
           },
           "401": {
-            "description": "Unauthorized - Authentication required",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Unauthorized"
           },
           "403": {
-            "description": "Forbidden - Access denied, not the owner",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Forbidden"
           },
           "404": {
-            "description": "Not Found - Cookbook not found",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Not Found"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/reviews/recipe/{recipeId}": {
       "get": {
-        "tags": ["Reviews"],
-        "summary": "Get reviews for recipe",
-        "description": "Get all reviews for a specific recipe with average rating",
+        "description": "",
         "parameters": [
           {
             "name": "recipeId",
             "in": "path",
             "required": true,
-            "type": "string",
-            "description": "Recipe ID"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Reviews retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Reviews retrieved successfully" },
-                "recipeId": { "type": "string", "example": "507f1f77bcf86cd799439011" },
-                "count": { "type": "number", "example": 2 },
-                "averageRating": { "type": "number", "example": 4.5 },
-                "reviews": {
-                  "type": "array",
-                  "items": { "$ref": "#/definitions/Review" }
-                }
-              }
-            }
+            "description": "OK"
           },
           "403": {
-            "description": "Forbidden - Cannot view reviews for private recipe",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Forbidden"
           },
           "404": {
-            "description": "Not Found - Recipe not found",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Not Found"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
           }
         }
       },
       "post": {
-        "tags": ["Reviews"],
-        "summary": "Add review to recipe",
-        "description": "Add a new review to a recipe with rating and comment",
-        "security": [{"bearerAuth": []}],
+        "description": "",
         "parameters": [
           {
             "name": "recipeId",
             "in": "path",
             "required": true,
-            "type": "string",
-            "description": "Recipe ID"
+            "type": "string"
           },
           {
             "name": "authorization",
             "in": "header",
-            "type": "string",
-            "description": "Bearer token for authentication"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Review data",
-            "required": true,
-            "schema": { "$ref": "#/definitions/ReviewInput" }
+            "type": "string"
           }
         ],
         "responses": {
           "201": {
-            "description": "Review created successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": { "type": "string", "example": "Review created successfully" },
-                "review": { "$ref": "#/definitions/Review" }
-              }
-            }
+            "description": "Created"
           },
           "400": {
-            "description": "Bad Request - Validation Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Bad Request"
           },
           "401": {
-            "description": "Unauthorized - Authentication required",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Unauthorized"
           },
           "403": {
-            "description": "Forbidden - Cannot review private recipe",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Forbidden"
           },
           "404": {
-            "description": "Not Found - Recipe not found",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Not Found"
           },
           "409": {
-            "description": "Conflict - User has already reviewed this recipe",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Conflict"
           },
           "500": {
-            "description": "Internal Server Error",
-            "schema": { "$ref": "#/definitions/Error" }
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/google": {
+      "get": {
+        "description": "",
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/google/callback": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/login/success": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/login/failed": {
+      "get": {
+        "description": "",
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/{id}/recipes": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recipe/{recipeId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "recipeId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     }
   },
   "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "example": "object"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439012"
+                }
+              }
+            },
+            "oauthId": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "123456789012345678901"
+                }
+              }
+            },
+            "displayName": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "John Doe"
+                }
+              }
+            },
+            "firstName": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "John"
+                }
+              }
+            },
+            "lastName": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Doe"
+                }
+              }
+            },
+            "email": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "john.doe@example.com"
+                }
+              }
+            },
+            "profileImageUrl": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "https://lh3.googleusercontent.com/a/default-user"
+                }
+              }
+            },
+            "createdAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            },
+            "updatedAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Recipe": {
       "type": "object",
       "properties": {
-        "_id": { "type": "string", "example": "507f1f77bcf86cd799439011" },
-        "title": { "type": "string", "example": "Chocolate Chip Cookies" },
-        "description": { "type": "string", "example": "Classic homemade cookies" },
-        "ingredients": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string", "example": "flour" },
-              "quantity": { "type": "string", "example": "2 cups" }
-            }
-          }
+        "type": {
+          "type": "string",
+          "example": "object"
         },
-        "instructions": {
-          "type": "array",
-          "items": { "type": "string" },
-          "example": ["Preheat oven to 375°F", "Mix ingredients", "Bake for 10 minutes"]
-        },
-        "prepTimeMinutes": { "type": "number", "example": 15 },
-        "cookTimeMinutes": { "type": "number", "example": 12 },
-        "servings": { "type": "number", "example": 24 },
-        "isPublic": { "type": "boolean", "example": true },
-        "tags": {
-          "type": "array",
-          "items": { "type": "string" },
-          "example": ["dessert", "cookies"]
-        },
-        "creatorId": {
+        "properties": {
           "type": "object",
           "properties": {
-            "_id": { "type": "string", "example": "507f1f77bcf86cd799439012" },
-            "displayName": { "type": "string", "example": "John Doe" }
+            "_id": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439011"
+                }
+              }
+            },
+            "title": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Chocolate Chip Cookies"
+                }
+              }
+            },
+            "description": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Classic homemade cookies"
+                }
+              }
+            },
+            "ingredients": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "flour"
+                            }
+                          }
+                        },
+                        "quantity": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "2 cups"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "instructions": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "type": "array",
+                  "example": [
+                    "Preheat oven to 375°F",
+                    "Mix ingredients",
+                    "Bake for 10 minutes"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "prepTimeMinutes": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "example": {
+                  "type": "number",
+                  "example": 15
+                }
+              }
+            },
+            "cookTimeMinutes": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "example": {
+                  "type": "number",
+                  "example": 12
+                }
+              }
+            },
+            "servings": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "example": {
+                  "type": "number",
+                  "example": 24
+                }
+              }
+            },
+            "isPublic": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "boolean"
+                },
+                "example": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            },
+            "tags": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "type": "array",
+                  "example": [
+                    "dessert",
+                    "cookies"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "creatorId": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "example": {
+                          "type": "string",
+                          "example": "507f1f77bcf86cd799439012"
+                        }
+                      }
+                    },
+                    "displayName": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "example": {
+                          "type": "string",
+                          "example": "John Doe"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "createdAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            },
+            "updatedAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            }
           }
-        },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        }
       }
     },
     "RecipeInput": {
       "type": "object",
-      "required": ["title"],
       "properties": {
-        "title": { "type": "string", "example": "Chocolate Chip Cookies" },
-        "description": { "type": "string", "example": "Classic homemade cookies" },
-        "ingredients": {
+        "type": {
+          "type": "string",
+          "example": "object"
+        },
+        "required": {
           "type": "array",
+          "example": [
+            "title"
+          ],
           "items": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string", "example": "flour" },
-              "quantity": { "type": "string", "example": "2 cups" }
-            }
+            "type": "string"
           }
         },
-        "instructions": {
-          "type": "array",
-          "items": { "type": "string" },
-          "example": ["Preheat oven to 375°F", "Mix ingredients"]
-        },
-        "prepTimeMinutes": { "type": "number", "example": 15 },
-        "cookTimeMinutes": { "type": "number", "example": 12 },
-        "servings": { "type": "number", "example": 24 },
-        "isPublic": { "type": "boolean", "example": true },
-        "tags": {
-          "type": "array",
-          "items": { "type": "string" },
-          "example": ["dessert", "cookies"]
+        "properties": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Chocolate Chip Cookies"
+                }
+              }
+            },
+            "description": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Classic homemade cookies"
+                }
+              }
+            },
+            "ingredients": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "object"
+                    },
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "flour"
+                            }
+                          }
+                        },
+                        "quantity": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "string"
+                            },
+                            "example": {
+                              "type": "string",
+                              "example": "2 cups"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "instructions": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "type": "array",
+                  "example": [
+                    "Preheat oven to 375°F",
+                    "Mix ingredients"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "prepTimeMinutes": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "example": {
+                  "type": "number",
+                  "example": 15
+                }
+              }
+            },
+            "cookTimeMinutes": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "example": {
+                  "type": "number",
+                  "example": 12
+                }
+              }
+            },
+            "servings": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "example": {
+                  "type": "number",
+                  "example": 24
+                }
+              }
+            },
+            "isPublic": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "boolean"
+                },
+                "example": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            },
+            "tags": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "type": "array",
+                  "example": [
+                    "dessert",
+                    "cookies"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "Cookbook": {
       "type": "object",
       "properties": {
-        "_id": { "type": "string", "example": "507f1f77bcf86cd799439013" },
-        "name": { "type": "string", "example": "My Dessert Collection" },
-        "description": { "type": "string", "example": "Sweet treats and desserts" },
-        "recipeIds": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/Recipe" }
+        "type": {
+          "type": "string",
+          "example": "object"
         },
-        "ownerId": {
+        "properties": {
           "type": "object",
           "properties": {
-            "_id": { "type": "string", "example": "507f1f77bcf86cd799439012" },
-            "displayName": { "type": "string", "example": "John Doe" }
+            "_id": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439013"
+                }
+              }
+            },
+            "name": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "My Dessert Collection"
+                }
+              }
+            },
+            "description": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Sweet treats and desserts"
+                }
+              }
+            },
+            "recipeIds": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "$ref": "#/definitions/Recipe"
+                }
+              }
+            },
+            "ownerId": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "example": {
+                          "type": "string",
+                          "example": "507f1f77bcf86cd799439012"
+                        }
+                      }
+                    },
+                    "displayName": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "example": {
+                          "type": "string",
+                          "example": "John Doe"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "createdAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            },
+            "updatedAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            }
           }
-        },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        }
       }
     },
     "CookbookInput": {
       "type": "object",
-      "required": ["name"],
       "properties": {
-        "name": { "type": "string", "example": "My Dessert Collection" },
-        "description": { "type": "string", "example": "Sweet treats and desserts" },
-        "recipeIds": {
+        "type": {
+          "type": "string",
+          "example": "object"
+        },
+        "required": {
           "type": "array",
-          "items": { "type": "string" },
-          "example": ["507f1f77bcf86cd799439011"]
+          "example": [
+            "name"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "My Dessert Collection"
+                }
+              }
+            },
+            "description": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Sweet treats and desserts"
+                }
+              }
+            },
+            "recipeIds": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "type": "array",
+                  "example": [
+                    "507f1f77bcf86cd799439011"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "Review": {
       "type": "object",
       "properties": {
-        "_id": { "type": "string", "example": "507f1f77bcf86cd799439014" },
-        "rating": { "type": "number", "minimum": 1, "maximum": 5, "example": 5 },
-        "comment": { "type": "string", "example": "Absolutely delicious!" },
-        "reviewerId": {
+        "type": {
+          "type": "string",
+          "example": "object"
+        },
+        "properties": {
           "type": "object",
           "properties": {
-            "_id": { "type": "string", "example": "507f1f77bcf86cd799439015" },
-            "displayName": { "type": "string", "example": "Jane Smith" }
+            "_id": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439014"
+                }
+              }
+            },
+            "rating": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "minimum": {
+                  "type": "number",
+                  "example": 1
+                },
+                "maximum": {
+                  "type": "number",
+                  "example": 5
+                },
+                "example": {
+                  "type": "number",
+                  "example": 5
+                }
+              }
+            },
+            "comment": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Absolutely delicious!"
+                }
+              }
+            },
+            "reviewerId": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "object"
+                },
+                "properties": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "example": {
+                          "type": "string",
+                          "example": "507f1f77bcf86cd799439015"
+                        }
+                      }
+                    },
+                    "displayName": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "example": {
+                          "type": "string",
+                          "example": "Jane Smith"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "recipeId": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "507f1f77bcf86cd799439011"
+                }
+              }
+            },
+            "createdAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            },
+            "updatedAt": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "format": {
+                  "type": "string",
+                  "example": "date-time"
+                }
+              }
+            }
           }
-        },
-        "recipeId": { "type": "string", "example": "507f1f77bcf86cd799439011" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+        }
       }
     },
     "ReviewInput": {
       "type": "object",
-      "required": ["rating"],
       "properties": {
-        "rating": { "type": "number", "minimum": 1, "maximum": 5, "example": 5 },
-        "comment": { "type": "string", "example": "Absolutely delicious!" }
+        "type": {
+          "type": "string",
+          "example": "object"
+        },
+        "required": {
+          "type": "array",
+          "example": [
+            "rating"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "number"
+                },
+                "minimum": {
+                  "type": "number",
+                  "example": 1
+                },
+                "maximum": {
+                  "type": "number",
+                  "example": 5
+                },
+                "example": {
+                  "type": "number",
+                  "example": 5
+                }
+              }
+            },
+            "comment": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Absolutely delicious!"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "Error": {
       "type": "object",
       "properties": {
-        "error": { "type": "string", "example": "Error message" },
-        "message": { "type": "string", "example": "Additional context" },
-        "details": {
-          "type": "array",
-          "items": { "type": "string" },
-          "example": ["Specific validation errors"]
+        "type": {
+          "type": "string",
+          "example": "object"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Error message"
+                }
+              }
+            },
+            "message": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "string"
+                },
+                "example": {
+                  "type": "string",
+                  "example": "Additional context"
+                }
+              }
+            },
+            "details": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "example": "array"
+                },
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "type": "array",
+                  "example": [
+                    "Specific validation errors"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

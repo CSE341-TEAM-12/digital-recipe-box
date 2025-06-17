@@ -9,6 +9,8 @@ router.get("/", (req, res) => {
 })
 
 // API Routes
+router.use('/auth', require('./auth'));
+router.use('/users', require('./user'));
 router.use('/recipes', require('./recipe'));
 router.use('/cookbooks', require('./cookbook'));
 router.use('/reviews', require('./review'));

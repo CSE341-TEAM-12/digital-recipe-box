@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const session = require('express-session');
+const passport = require('passport');
 const swaggerUi = require('swagger-ui-express');
 const routes = require("./routes")
 const db = require('./config/db');
@@ -10,6 +12,25 @@ const app = express();
 
 // Connect to MongoDB
 db.connectDB();
+
+// Configure Passport
+require('./config/passport')(passport);
+
+// Session Configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'digital-recipe-box-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // CORS Configuration for production
 const corsOptions = {
@@ -119,4 +140,11 @@ app.use("/", routes)
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Google OAuth Configuration:`);
+  console.log(`- Client ID: ${process.env.GOOGLE_CLIENT_ID ? 'Set' : 'NOT SET'}`);
+  console.log(`- Client Secret: ${process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'NOT SET'}`);
+  console.log(`- Callback URL: ${process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'}`);
+  console.log(`- Session Secret: ${process.env.SESSION_SECRET ? 'Set' : 'Using default (change in production)'}`);
+});
