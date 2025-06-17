@@ -55,36 +55,63 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Dynamic Swagger Documentation
+// Swagger Documentation with Relative Paths
 let swaggerDocument = require('./swagger/swagger.json');
 
-// Middleware to dynamically set Swagger host
+// Create swagger options for relative paths
+const swaggerOptions = {
+  swaggerOptions: {
+    // Ensure relative paths work in all environments
+    url: './swagger.json', // Relative URL to the swagger JSON
+    dom_id: '#swagger-ui',
+    deepLinking: true,
+    displayOperationId: false,
+    defaultModelsExpandDepth: 1,
+    defaultModelExpandDepth: 1,
+    defaultModelRendering: 'example',
+    displayRequestDuration: false,
+    docExpansion: 'none',
+    filter: false,
+    layout: 'StandaloneLayout',
+    maxDisplayedTags: null,
+    operationsSorter: null,
+    showExtensions: false,
+    tagsSorter: null,
+    tryItOutEnabled: true,
+    validatorUrl: null,
+    withCredentials: false
+  },
+  customCss: '.swagger-ui .opblock .opblock-summary-path-description-wrapper { align-items: center; display: flex; flex-wrap: wrap; gap: 0 10px; padding: 0 10px; width: 100%; }'
+};
+
+// Middleware to serve Swagger with relative paths
 app.use('/api-docs', (req, res, next) => {
-  // Create a copy of the swagger document to avoid modifying the original
-  const dynamicSwaggerDoc = { ...swaggerDocument };
+  // Create a clean swagger document without host
+  const cleanSwaggerDoc = { ...swaggerDocument };
   
-  // Set the host dynamically based on the request
+  // Remove host completely for relative paths
+  delete cleanSwaggerDoc.host;
+  
+  // Ensure schemes are set correctly
   const protocol = req.get('x-forwarded-proto') || req.protocol || 'http';
-  const host = req.get('host');
+  cleanSwaggerDoc.schemes = protocol === 'https' ? ['https', 'http'] : ['http', 'https'];
   
-  // Remove port for standard ports in production
-  const cleanHost = process.env.NODE_ENV === 'production' && 
-    ((protocol === 'https' && host.endsWith(':443')) || 
-     (protocol === 'http' && host.endsWith(':80'))) 
-    ? host.replace(/:(80|443)$/, '') 
-    : host;
+  // Log configuration
+  console.log(`Swagger UI configured for relative paths (${protocol}://${req.get('host')})`);
   
-  dynamicSwaggerDoc.host = cleanHost;
-  dynamicSwaggerDoc.schemes = protocol === 'https' ? ['https', 'http'] : ['http', 'https'];
-  
-  console.log(`Swagger configured for: ${protocol}://${cleanHost}`);
-  
-  // Store the dynamic document for swagger-ui-express
-  req.swaggerDoc = dynamicSwaggerDoc;
+  // Store the clean document
+  req.swaggerDoc = cleanSwaggerDoc;
   next();
-}, swaggerUi.serve, (req, res, next) => {
-  // Use the dynamic swagger document
-  swaggerUi.setup(req.swaggerDoc)(req, res, next);
+});
+
+// Serve swagger JSON at a separate endpoint for reference
+app.get('/api-docs/swagger.json', (req, res) => {
+  res.json(req.swaggerDoc || swaggerDocument);
+});
+
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, (req, res, next) => {
+  swaggerUi.setup(req.swaggerDoc, swaggerOptions)(req, res, next);
 });
 
 // Routes 

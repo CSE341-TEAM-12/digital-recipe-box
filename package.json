@@ -23,7 +23,8 @@
     "dev": "nodemon server.js",
     "docs": "node ./swagger/swagger-autogen.js",
     "start:dev": "PORT=3000 NODE_ENV=development node server.js",
-    "start:prod": "NODE_ENV=production node server.js"
+    "start:prod": "NODE_ENV=production node server.js",
+    "test:swagger": "PORT=3000 NODE_ENV=production node server.js && echo 'Visit http://localhost:3000/api-docs/ to test Swagger with relative paths'"
   },
   "dependencies": {
     "body-parser": "^2.2.0",
