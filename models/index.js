@@ -14,10 +14,10 @@ mongoose.Promise = global.Promise;
 const db = {
     mongoose : mongoose,
     url :  dbConfig.url,
-    recipe: recipe(mongoose),
-    cookbook: cookbook(mongoose),
-    review: review(mongoose),
-    user: user(mongoose)
+    Recipe: recipe(mongoose),
+    Cookbook: cookbook(mongoose),
+    Review: review(mongoose),
+    User: user(mongoose)
 
 };
 
