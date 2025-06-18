@@ -2,12 +2,24 @@ const router = require('express').Router();
 const passport = require('passport');
 const { ensureLoggedOut } = require('../middleware/auth');
 
+// Helper function to check if Google OAuth is configured
+const isGoogleOAuthConfigured = () => {
+  return !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+};
+
 // #swagger.tags = ['Authentication']
 // #swagger.summary = 'Initiate Google OAuth login'
 // #swagger.description = 'Redirects user to Google OAuth consent screen to begin authentication process'
-router.get('/google', ensureLoggedOut, passport.authenticate('google', {
-  scope: ['profile', 'email']
-}));
+router.get('/google', ensureLoggedOut, (req, res, next) => {
+  if (!isGoogleOAuthConfigured()) {
+    return res.status(503).json({
+      error: 'Google OAuth not configured',
+      message: 'Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables',
+      instructions: 'For testing purposes, use Bearer token "test-token" in Authorization header'
+    });
+  }
+  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
 /* #swagger.responses[302] = {
     description: 'Redirect to Google OAuth consent screen'
 } */
@@ -15,18 +27,32 @@ router.get('/google', ensureLoggedOut, passport.authenticate('google', {
     description: 'User is already logged in',
     schema: { $ref: '#/definitions/Error' }
 } */
+/* #swagger.responses[503] = {
+    description: 'Google OAuth not configured',
+    schema: { $ref: '#/definitions/Error' }
+} */
 
 // #swagger.tags = ['Authentication']
 // #swagger.summary = 'Google OAuth callback'
 // #swagger.description = 'Handles the callback from Google OAuth and completes the authentication process'
-router.get('/google/callback', 
+router.get('/google/callback', (req, res, next) => {
+  if (!isGoogleOAuthConfigured()) {
+    return res.status(503).json({
+      error: 'Google OAuth not configured',
+      message: 'Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables'
+    });
+  }
   passport.authenticate('google', { 
     failureRedirect: '/auth/login/failed',
     successRedirect: '/auth/login/success'
-  })
-);
+  })(req, res, next);
+});
 /* #swagger.responses[302] = {
     description: 'Redirect to success or failure page after authentication'
+} */
+/* #swagger.responses[503] = {
+    description: 'Google OAuth not configured',
+    schema: { $ref: '#/definitions/Error' }
 } */
 
 // #swagger.tags = ['Authentication']
@@ -141,6 +167,8 @@ router.get('/logout', (req, res) => {
 // #swagger.summary = 'Check authentication status'
 // #swagger.description = 'Check if the current user is authenticated and return their basic information'
 router.get('/status', (req, res) => {
+  const oauthConfigured = isGoogleOAuthConfigured();
+  
   if (req.user) {
     res.status(200).json({
       authenticated: true,
@@ -149,13 +177,16 @@ router.get('/status', (req, res) => {
         displayName: req.user.displayName,
         email: req.user.email,
         profileImageUrl: req.user.profileImageUrl
-      }
+      },
+      oauthConfigured
     });
   } else {
     res.status(200).json({
       authenticated: false,
       message: 'User not authenticated',
-      loginUrl: '/auth/google'
+      loginUrl: oauthConfigured ? '/auth/google' : 'Google OAuth not configured',
+      oauthConfigured,
+      testMode: !oauthConfigured ? 'Use Bearer token "test-token" for testing' : undefined
     });
   }
 });
@@ -167,7 +198,9 @@ router.get('/status', (req, res) => {
             authenticated: { type: 'boolean', example: true },
             user: { $ref: '#/definitions/User' },
             message: { type: 'string', example: 'User not authenticated' },
-            loginUrl: { type: 'string', example: '/auth/google' }
+            loginUrl: { type: 'string', example: '/auth/google' },
+            oauthConfigured: { type: 'boolean', example: true },
+            testMode: { type: 'string', example: 'Use Bearer token "test-token" for testing' }
         }
     }
 } */

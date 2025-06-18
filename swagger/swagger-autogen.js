@@ -223,7 +223,7 @@ const doc = {
 };
 
 const outputFile = './swagger.json';
-// Include all route files directly for better scanning
+// Scan all route files individually to capture swagger comments properly
 const endpointsFiles = [
   '../routes/index.js',
   '../routes/auth.js',
@@ -233,5 +233,17 @@ const endpointsFiles = [
   '../routes/review.js'
 ];
 
-// generate swagger.json
-swaggerAutogen(outputFile, endpointsFiles, doc);
+// Enhanced options for swagger-autogen
+const options = {
+  openapi: null, // Using Swagger 2.0 format
+  language: 'en-US',
+  disableLogs: false,
+  autoHeaders: true, // Enable automatic headers capture
+  autoQuery: true, // Enable automatic query capture  
+  autoBody: true // Enable automatic body capture
+};
+
+// generate swagger.json with enhanced options
+swaggerAutogen(outputFile, endpointsFiles, doc, options).then(() => {
+  console.log('Swagger documentation generated successfully with tags!');
+});

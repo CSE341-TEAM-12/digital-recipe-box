@@ -3,12 +3,41 @@ const db = require('../models');
 const User = db.users;
 
 module.exports = function(passport) {
-  // Google OAuth Strategy
-  passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback'
+  // Check if Google OAuth environment variables are set
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL || '/auth/google/callback';
+
+  if (!googleClientId || !googleClientSecret) {
+    console.warn('⚠️  Google OAuth not configured:');
+    console.warn('   - GOOGLE_CLIENT_ID:', googleClientId ? 'Set' : 'NOT SET');
+    console.warn('   - GOOGLE_CLIENT_SECRET:', googleClientSecret ? 'Set' : 'NOT SET');
+    console.warn('   - Authentication will work with test tokens only');
+    console.warn('   - Set up Google OAuth credentials in .env file for full functionality');
     
+    // Set up minimal passport configuration for testing
+    passport.serializeUser((user, done) => {
+      done(null, user._id);
+    });
+
+    passport.deserializeUser(async (id, done) => {
+      try {
+        const user = await User.findById(id);
+        done(null, user);
+      } catch (error) {
+        console.error('Error deserializing user:', error);
+        done(error, null);
+      }
+    });
+    
+    return; // Exit early if OAuth not configured
+  }
+
+  // Google OAuth Strategy (only if environment variables are present)
+  passport.use(new GoogleStrategy({
+    clientID: googleClientId,
+    clientSecret: googleClientSecret,
+    callbackURL: googleCallbackUrl
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -58,4 +87,6 @@ module.exports = function(passport) {
       done(error, null);
     }
   });
+
+  console.log('✅ Google OAuth configured successfully');
 }; 

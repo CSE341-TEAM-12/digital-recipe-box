@@ -67,7 +67,7 @@
   "paths": {
     "/": {
       "get": {
-        "description": "",
+        "description": "Returns a welcome message for the Digital Recipe Box API. This endpoint can be used to check if the API is running and accessible.",
         "parameters": [
           {
             "name": "authorization",
@@ -101,7 +101,11 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "General"
+        ],
+        "summary": "API Welcome Message"
       },
       "post": {
         "description": "",
@@ -125,32 +129,46 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "General"
+        ]
       }
     },
     "/auth/google": {
       "get": {
-        "description": "",
+        "description": "Redirects user to Google OAuth consent screen to begin authentication process",
         "responses": {
           "400": {
             "description": "Bad Request"
+          },
+          "503": {
+            "description": "Service Unavailable"
           }
-        }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Initiate Google OAuth login"
       }
     },
     "/auth/google/callback": {
       "get": {
-        "description": "",
+        "description": "Handles the callback from Google OAuth and completes the authentication process",
         "responses": {
-          "default": {
-            "description": ""
+          "503": {
+            "description": "Service Unavailable"
           }
-        }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Google OAuth callback"
       }
     },
     "/auth/login/success": {
       "get": {
-        "description": "",
+        "description": "Endpoint hit after successful Google OAuth authentication",
         "responses": {
           "200": {
             "description": "OK"
@@ -158,22 +176,30 @@
           "401": {
             "description": "Unauthorized"
           }
-        }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authentication success"
       }
     },
     "/auth/login/failed": {
       "get": {
-        "description": "",
+        "description": "Endpoint hit after failed Google OAuth authentication",
         "responses": {
           "401": {
             "description": "Unauthorized"
           }
-        }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authentication failure"
       }
     },
     "/auth/logout": {
       "get": {
-        "description": "",
+        "description": "Logs out the currently authenticated user and destroys the session",
         "responses": {
           "200": {
             "description": "OK"
@@ -184,22 +210,30 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logout user"
       }
     },
     "/auth/status": {
       "get": {
-        "description": "",
+        "description": "Check if the current user is authenticated and return their basic information",
         "responses": {
           "200": {
             "description": "OK"
           }
-        }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Check authentication status"
       }
     },
     "/users/me": {
       "get": {
-        "description": "",
+        "description": "Get the profile information of the currently authenticated user",
         "parameters": [
           {
             "name": "authorization",
@@ -217,12 +251,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user profile"
       }
     },
     "/users/{id}/recipes": {
       "get": {
-        "description": "",
+        "description": "Get all public recipes created by a specific user",
         "parameters": [
           {
             "name": "id",
@@ -241,12 +279,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user recipes"
       }
     },
     "/recipes/": {
       "get": {
-        "description": "",
+        "description": "Retrieve a list of all public recipes available to all users. This endpoint returns recipes that have been marked as public by their creators.",
         "responses": {
           "200": {
             "description": "OK"
@@ -254,10 +296,14 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Get all public recipes"
       },
       "post": {
-        "description": "",
+        "description": "Create a new recipe with ingredients, instructions, and metadata. Requires authentication. The recipe will be associated with the authenticated user.",
         "parameters": [
           {
             "name": "authorization",
@@ -278,12 +324,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Create a new recipe"
       }
     },
     "/recipes/{id}": {
       "get": {
-        "description": "",
+        "description": "Get a specific recipe by its ID. Public recipes can be accessed by anyone, while private recipes require authentication and ownership.",
         "parameters": [
           {
             "name": "id",
@@ -305,12 +355,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Get a single recipe by ID"
       }
     },
     "/cookbooks/": {
       "get": {
-        "description": "",
+        "description": "Get all cookbooks owned by the authenticated user. This endpoint returns a list of cookbooks that belong to the logged-in user.",
         "parameters": [
           {
             "name": "authorization",
@@ -328,10 +382,14 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Get all user cookbooks"
       },
       "post": {
-        "description": "",
+        "description": "Create a new cookbook with a name, description, and optional recipe collection. Requires authentication. The cookbook will be associated with the authenticated user.",
         "parameters": [
           {
             "name": "authorization",
@@ -352,12 +410,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Create a new cookbook"
       }
     },
     "/cookbooks/{id}": {
       "get": {
-        "description": "",
+        "description": "Get a specific cookbook by its ID. User must be the owner of the cookbook to access it.",
         "parameters": [
           {
             "name": "id",
@@ -387,12 +449,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Get a single cookbook by ID"
       }
     },
     "/reviews/recipe/{recipeId}": {
       "get": {
-        "description": "",
+        "description": "Get all reviews for a specific recipe. This endpoint returns reviews for public recipes and calculates the average rating.",
         "parameters": [
           {
             "name": "recipeId",
@@ -414,10 +480,14 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get all reviews for a recipe"
       },
       "post": {
-        "description": "",
+        "description": "Add a new review to a recipe with rating and comment. Requires authentication. Users can only review public recipes and cannot review the same recipe twice.",
         "parameters": [
           {
             "name": "recipeId",
@@ -453,7 +523,11 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Add a review to a recipe"
       }
     },
     "/google": {
@@ -462,6 +536,9 @@
         "responses": {
           "400": {
             "description": "Bad Request"
+          },
+          "503": {
+            "description": "Service Unavailable"
           }
         }
       }
@@ -470,8 +547,8 @@
       "get": {
         "description": "",
         "responses": {
-          "default": {
-            "description": ""
+          "503": {
+            "description": "Service Unavailable"
           }
         }
       }
