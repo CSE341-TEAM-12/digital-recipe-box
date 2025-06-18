@@ -1,6 +1,6 @@
 module.exports = (mongoose) => {
     const Review = mongoose.model(
-        "review", new mongoose.Schema({
+        "Review", new mongoose.Schema({
             reviewerId: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
             recipeId: {type: mongoose.Schema.Types.ObjectId, ref: "Recipe"},
             rating: {type: Number},

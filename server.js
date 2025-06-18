@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const session = require('express-session');
+const MongoStore = require("connect-mongo");
 const passport = require('passport');
 const swaggerUi = require('swagger-ui-express');
 const routes = require("./routes")
@@ -18,6 +19,7 @@ require('./config/passport')(passport);
 
 // Session Configuration
 app.use(session({
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI}),
   secret: process.env.SESSION_SECRET || 'digital-recipe-box-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
