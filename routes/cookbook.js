@@ -31,7 +31,7 @@ router.get('/', authenticateUser, cookbookController.getUserCookbooks);
 // #swagger.summary = 'Get a single cookbook by ID'
 // #swagger.description = 'Get a specific cookbook by its ID. Public endpoint that allows viewing cookbooks.'
 // #swagger.parameters['id'] = { in: 'path', description: 'Cookbook ID', required: true, type: 'string' }
-router.get('/:id', validateObjectId, cookbookController.getCookbookById);
+router.get('/:id', ...validateObjectId, cookbookController.getCookbookById);
 /* #swagger.responses[200] = {
     description: 'Cookbook retrieved successfully',
     schema: {
@@ -55,20 +55,12 @@ router.get('/:id', validateObjectId, cookbookController.getCookbookById);
     schema: { $ref: '#/definitions/Error' }
 } */
 
-router.post('/', (req, res, next) => {
-  // #swagger.tags = ['Cookbooks']
-  // #swagger.summary = 'Create a new cookbook'
-  // #swagger.description = 'Create a new cookbook with a name, description, and optional recipe collection. Requires authentication. The cookbook will be associated with the authenticated user.'
-  // #swagger.security = [{ "googleAuth": [] }]
-  // #swagger.parameters['body'] = { in: 'body', description: 'Cookbook data', required: true, schema: { $ref: '#/definitions/CookbookInput' } }
-  authenticateUser(req, res, (err) => {
-    if (err) return next(err);
-    validateCookbook(req, res, (err2) => {
-      if (err2) return next(err2);
-      cookbookController.createCookbook(req, res, next);
-    });
-  });
-});
+router.post('/', authenticateUser, ...validateCookbook, cookbookController.createCookbook);
+/* #swagger.tags = ['Cookbooks']
+   #swagger.summary = 'Create a new cookbook'
+   #swagger.description = 'Create a new cookbook with a name, description, and optional recipe collection. Requires authentication. The cookbook will be associated with the authenticated user.'
+   #swagger.security = [{ "googleAuth": [] }]
+   #swagger.parameters['body'] = { in: 'body', description: 'Cookbook data', required: true, schema: { $ref: '#/definitions/CookbookInput' } } */
 /* #swagger.responses[201] = {
     description: 'Cookbook created successfully',
     schema: {
@@ -88,24 +80,13 @@ router.post('/', (req, res, next) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-router.put('/:id', (req, res, next) => {
-  // #swagger.tags = ['Cookbooks']
-  // #swagger.summary = 'Update a cookbook by ID'
-  // #swagger.description = 'Update an existing cookbook with new name, description, or recipe collection. Only the cookbook owner can update their own cookbooks. Requires authentication.'
-  // #swagger.security = [{ "googleAuth": [] }]
-  // #swagger.parameters['id'] = { in: 'path', description: 'Cookbook ID', required: true, type: 'string' }
-  // #swagger.parameters['body'] = { in: 'body', description: 'Updated cookbook data', required: true, schema: { $ref: '#/definitions/CookbookInput' } }
-  authenticateUser(req, res, (err) => {
-    if (err) return next(err);
-    validateObjectId(req, res, (err2) => {
-      if (err2) return next(err2);
-      validateCookbook(req, res, (err3) => {
-        if (err3) return next(err3);
-        cookbookController.updateCookbook(req, res, next);
-      });
-    });
-  });
-});
+router.put('/:id', authenticateUser, ...validateObjectId, ...validateCookbook, cookbookController.updateCookbook);
+/* #swagger.tags = ['Cookbooks']
+   #swagger.summary = 'Update a cookbook by ID'
+   #swagger.description = 'Update an existing cookbook with new name, description, or recipe collection. Only the cookbook owner can update their own cookbooks. Requires authentication.'
+   #swagger.security = [{ "googleAuth": [] }]
+   #swagger.parameters['id'] = { in: 'path', description: 'Cookbook ID', required: true, type: 'string' }
+   #swagger.parameters['body'] = { in: 'body', description: 'Updated cookbook data', required: true, schema: { $ref: '#/definitions/CookbookInput' } } */
 /* #swagger.responses[200] = {
     description: 'Cookbook updated successfully',
     schema: {
@@ -138,7 +119,7 @@ router.put('/:id', (req, res, next) => {
 // #swagger.description = 'Delete a cookbook permanently. Only the cookbook owner can delete their own cookbooks. This action cannot be undone. Requires authentication.'
 // #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'Cookbook ID', required: true, type: 'string' }
-router.delete('/:id', authenticateUser, validateObjectId, cookbookController.deleteCookbook);
+router.delete('/:id', authenticateUser, ...validateObjectId, cookbookController.deleteCookbook);
 /* #swagger.responses[200] = {
     description: 'Cookbook deleted successfully',
     schema: {

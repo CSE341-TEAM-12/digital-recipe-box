@@ -38,16 +38,11 @@ router.get('/', (req, res, next) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-router.get('/me', (req, res, next) => {
-  // #swagger.tags = ['Users']
-  // #swagger.summary = 'Get current user profile'
-  // #swagger.description = 'Get the profile information of the currently authenticated user'
-  // #swagger.security = [{ "googleAuth": [] }]
-  authenticateUser(req, res, (err) => {
-    if (err) return next(err);
-    userController.getCurrentUser(req, res, next);
-  });
-});
+router.get('/me', authenticateUser, userController.getCurrentUser);
+/* #swagger.tags = ['Users']
+   #swagger.summary = 'Get current user profile'
+   #swagger.description = 'Get the profile information of the currently authenticated user'
+   #swagger.security = [{ "googleAuth": [] }] */
 /* #swagger.responses[200] = {
     description: 'User profile retrieved successfully',
     schema: {
@@ -67,16 +62,11 @@ router.get('/me', (req, res, next) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-router.get('/:id/recipes', (req, res, next) => {
-  // #swagger.tags = ['Users']
-  // #swagger.summary = 'Get user recipes'
-  // #swagger.description = 'Get all public recipes created by a specific user'
-  // #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
-  validateObjectId(req, res, (err) => {
-    if (err) return next(err);
-    userController.getUserRecipes(req, res, next);
-  });
-});
+router.get('/:id/recipes', ...validateObjectId, userController.getUserRecipes);
+/* #swagger.tags = ['Users']
+   #swagger.summary = 'Get user recipes'
+   #swagger.description = 'Get all public recipes created by a specific user'
+   #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' } */
 /* #swagger.responses[200] = {
     description: 'User recipes retrieved successfully',
     schema: {
@@ -107,21 +97,13 @@ router.get('/:id/recipes', (req, res, next) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-router.put('/:id', (req, res, next) => {
-  // #swagger.tags = ['Users']
-  // #swagger.summary = 'Update user profile'
-  // #swagger.description = 'Update the profile information of a specific user. Users can update their own profile information including display name, first name, last name, email, and profile image URL.'
-  // #swagger.security = [{ "googleAuth": [] }]
-  // #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
-  // #swagger.parameters['body'] = { in: 'body', description: 'User profile data to update', required: true, schema: { $ref: '#/definitions/UserUpdateInput' } }
-  authenticateUser(req, res, (err) => {
-    if (err) return next(err);
-    validateObjectId(req, res, (err2) => {
-      if (err2) return next(err2);
-      userController.updateUserProfile(req, res, next);
-    });
-  });
-});
+router.put('/:id', authenticateUser, ...validateObjectId, userController.updateUserProfile);
+/* #swagger.tags = ['Users']
+   #swagger.summary = 'Update user profile'
+   #swagger.description = 'Update the profile information of a specific user. Users can update their own profile information including display name, first name, last name, email, and profile image URL.'
+   #swagger.security = [{ "googleAuth": [] }]
+   #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
+   #swagger.parameters['body'] = { in: 'body', description: 'User profile data to update', required: true, schema: { $ref: '#/definitions/UserUpdateInput' } } */
 /* #swagger.responses[200] = {
     description: 'User profile updated successfully',
     schema: {
@@ -145,20 +127,12 @@ router.put('/:id', (req, res, next) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-router.delete('/:id', (req, res, next) => {
-  // #swagger.tags = ['Users']
-  // #swagger.summary = 'Delete user account'
-  // #swagger.description = 'Permanently delete a user account. This action cannot be undone and will remove all user data from the system.'
-  // #swagger.security = [{ "googleAuth": [] }]
-  // #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
-  authenticateUser(req, res, (err) => {
-    if (err) return next(err);
-    validateObjectId(req, res, (err2) => {
-      if (err2) return next(err2);
-      userController.deleteUserAccount(req, res, next);
-    });
-  });
-});
+router.delete('/:id', authenticateUser, ...validateObjectId, userController.deleteUserAccount);
+/* #swagger.tags = ['Users']
+   #swagger.summary = 'Delete user account'
+   #swagger.description = 'Permanently delete a user account. This action cannot be undone and will remove all user data from the system.'
+   #swagger.security = [{ "googleAuth": [] }]
+   #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' } */
 /* #swagger.responses[200] = {
     description: 'User account deleted successfully',
     schema: {
