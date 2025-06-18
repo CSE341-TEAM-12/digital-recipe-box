@@ -222,7 +222,7 @@ const doc = {
   }
 };
 
-const outputFile = './swagger.json';
+const outputFile = './swagger/swagger.json';
 // Scan all route files individually to capture swagger comments properly
 const endpointsFiles = [
   '../routes/index.js',
@@ -240,10 +240,37 @@ const options = {
   disableLogs: false,
   autoHeaders: true, // Enable automatic headers capture
   autoQuery: true, // Enable automatic query capture  
-  autoBody: true // Enable automatic body capture
+  autoBody: true, // Enable automatic body capture
+  writeOutputFile: true // Ensure the output file is written
 };
 
 // generate swagger.json with enhanced options
-swaggerAutogen(outputFile, endpointsFiles, doc, options).then(() => {
+swaggerAutogen(outputFile, endpointsFiles, doc, options).then((data) => {
   console.log('Swagger documentation generated successfully with tags!');
+  
+  // Log some debug information
+  if (data && data.success) {
+    console.log('✅ Swagger generation completed successfully');
+  } else {
+    console.log('⚠️ Swagger generation completed with warnings');
+  }
+  
+  // Verify that the output file was created
+  const fs = require('fs');
+  if (fs.existsSync(outputFile)) {
+    console.log(`📄 Swagger file created at: ${outputFile}`);
+    
+    // Run the tag fix script
+    console.log('🔧 Running tag fix script...');
+    try {
+      const fixSwaggerTags = require('./fix-swagger-tags.js');
+      fixSwaggerTags();
+    } catch (error) {
+      console.error('❌ Error running tag fix script:', error.message);
+    }
+  } else {
+    console.error('❌ Failed to create swagger output file');
+  }
+}).catch((error) => {
+  console.error('❌ Error generating Swagger documentation:', error);
 });

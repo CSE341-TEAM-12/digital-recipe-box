@@ -4,6 +4,55 @@ const { authenticateUser } = require('../middleware/auth');
 const { validateReview, validateRecipeId, validateObjectId } = require('../middleware/validation');
 
 // #swagger.tags = ['Reviews']
+// #swagger.summary = 'Get all reviews'
+// #swagger.description = 'Get all reviews from the system. Only shows reviews for public recipes to respect privacy settings.'
+router.get('/', reviewController.getAllReviews);
+/* #swagger.responses[200] = {
+    description: 'Reviews retrieved successfully',
+    schema: {
+        type: 'object',
+        properties: {
+            message: { type: 'string', example: 'Reviews retrieved successfully' },
+            count: { type: 'number', example: 25 },
+            reviews: {
+                type: 'array',
+                items: {
+                    type: 'object',
+                    properties: {
+                        _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                        rating: { type: 'number', example: 4 },
+                        comment: { type: 'string', example: 'Great recipe!' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                        updatedAt: { type: 'string', format: 'date-time' },
+                        recipeId: {
+                            type: 'object',
+                            properties: {
+                                _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                                title: { type: 'string', example: 'Chocolate Cake' },
+                                description: { type: 'string', example: 'Delicious chocolate cake recipe' }
+                            }
+                        },
+                        reviewerId: {
+                            type: 'object',
+                            properties: {
+                                _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                                displayName: { type: 'string', example: 'John Doe' },
+                                firstName: { type: 'string', example: 'John' },
+                                lastName: { type: 'string', example: 'Doe' }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+} */
+/* #swagger.responses[500] = {
+    description: 'Internal server error',
+    schema: { $ref: '#/definitions/Error' }
+} */
+
+// #swagger.tags = ['Reviews']
 // #swagger.summary = 'Get all reviews for a recipe'
 // #swagger.description = 'Get all reviews for a specific recipe. This endpoint returns reviews for public recipes and calculates the average rating.'
 // #swagger.parameters['recipeId'] = { in: 'path', description: 'Recipe ID', required: true, type: 'string' }
@@ -81,13 +130,24 @@ router.get('/:id', validateObjectId, reviewController.getReviewById);
     schema: { $ref: '#/definitions/Error' }
 } */
 
-// #swagger.tags = ['Reviews']
-// #swagger.summary = 'Add a review to a recipe'
-// #swagger.description = 'Add a new review to a recipe with rating and comment. Requires authentication. Users can only review public recipes and cannot review the same recipe twice.'
-// #swagger.security = [{ "googleAuth": [] }]
-// #swagger.parameters['recipeId'] = { in: 'path', description: 'Recipe ID', required: true, type: 'string' }
-// #swagger.parameters['body'] = { in: 'body', description: 'Review data', required: true, schema: { $ref: '#/definitions/ReviewInput' } }
-router.post('/recipe/:recipeId', authenticateUser, validateRecipeId, validateReview, reviewController.createReview);
+router.post('/recipe/:recipeId', (req, res, next) => {
+  // #swagger.tags = ['Reviews']
+  // #swagger.summary = 'Add a review to a recipe'
+  // #swagger.description = 'Add a new review to a recipe with rating and comment. Requires authentication. Users can only review public recipes and cannot review the same recipe twice.'
+  // #swagger.security = [{ "googleAuth": [] }]
+  // #swagger.parameters['recipeId'] = { in: 'path', description: 'Recipe ID', required: true, type: 'string' }
+  // #swagger.parameters['body'] = { in: 'body', description: 'Review data', required: true, schema: { $ref: '#/definitions/ReviewInput' } }
+  authenticateUser(req, res, (err) => {
+    if (err) return next(err);
+    validateRecipeId(req, res, (err2) => {
+      if (err2) return next(err2);
+      validateReview(req, res, (err3) => {
+        if (err3) return next(err3);
+        reviewController.createReview(req, res, next);
+      });
+    });
+  });
+});
 /* #swagger.responses[201] = {
     description: 'Review created successfully',
     schema: {
@@ -119,13 +179,24 @@ router.post('/recipe/:recipeId', authenticateUser, validateRecipeId, validateRev
     schema: { $ref: '#/definitions/Error' }
 } */
 
-// #swagger.tags = ['Reviews']
-// #swagger.summary = 'Update a review by ID'
-// #swagger.description = 'Update an existing review. Only the review author can update their own reviews. Requires authentication.'
-// #swagger.security = [{ "googleAuth": [] }]
-// #swagger.parameters['id'] = { in: 'path', description: 'Review ID', required: true, type: 'string' }
-// #swagger.parameters['body'] = { in: 'body', description: 'Updated review data', required: true, schema: { $ref: '#/definitions/ReviewInput' } }
-router.put('/:id', authenticateUser, validateObjectId, validateReview, reviewController.updateReview);
+router.put('/:id', (req, res, next) => {
+  // #swagger.tags = ['Reviews']
+  // #swagger.summary = 'Update a review by ID'
+  // #swagger.description = 'Update an existing review. Only the review author can update their own reviews. Requires authentication.'
+  // #swagger.security = [{ "googleAuth": [] }]
+  // #swagger.parameters['id'] = { in: 'path', description: 'Review ID', required: true, type: 'string' }
+  // #swagger.parameters['body'] = { in: 'body', description: 'Updated review data', required: true, schema: { $ref: '#/definitions/ReviewInput' } }
+  authenticateUser(req, res, (err) => {
+    if (err) return next(err);
+    validateObjectId(req, res, (err2) => {
+      if (err2) return next(err2);
+      validateReview(req, res, (err3) => {
+        if (err3) return next(err3);
+        reviewController.updateReview(req, res, next);
+      });
+    });
+  });
+});
 /* #swagger.responses[200] = {
     description: 'Review updated successfully',
     schema: {

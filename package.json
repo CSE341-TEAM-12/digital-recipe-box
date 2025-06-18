@@ -28,7 +28,7 @@
     "start:dev": "PORT=3000 NODE_ENV=development node server.js",
     "start:prod": "NODE_ENV=production node server.js",
     "test:swagger": "PORT=3000 NODE_ENV=production node server.js && echo 'Visit http://localhost:3000/api-docs/ to test Swagger with relative paths'",
-    "build": "npm run clean && npm run docs && npm run test:ci",
+    "build": "npm run clean && npm run test:ci",
     "build:full": "npm run clean && npm run docs && npm run test:coverage && npm run verify",
     "clean": "rm -rf coverage/ && rm -rf node_modules/.cache/ && rm -rf ~/.cache/mongodb-binaries/ && rm -rf /tmp/mongodb-binaries/ || true",
     "verify": "npm run test:ci && npm run health-check",

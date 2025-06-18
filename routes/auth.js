@@ -7,10 +7,10 @@ const isGoogleOAuthConfigured = () => {
   return !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 };
 
-// #swagger.tags = ['Authentication']
-// #swagger.summary = 'Initiate Google OAuth login'
-// #swagger.description = 'Redirects user to Google OAuth consent screen to begin authentication process'
 router.get('/google', ensureLoggedOut, (req, res, next) => {
+  // #swagger.tags = ['Authentication']
+  // #swagger.summary = 'Initiate Google OAuth login'
+  // #swagger.description = 'Redirects user to Google OAuth consent screen to begin authentication process'
   if (!isGoogleOAuthConfigured()) {
     return res.status(503).json({
       error: 'Google OAuth not configured',
@@ -32,10 +32,10 @@ router.get('/google', ensureLoggedOut, (req, res, next) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-// #swagger.tags = ['Authentication']
-// #swagger.summary = 'Google OAuth callback'
-// #swagger.description = 'Handles the callback from Google OAuth and completes the authentication process'
 router.get('/google/callback', (req, res, next) => {
+  // #swagger.tags = ['Authentication']
+  // #swagger.summary = 'Google OAuth callback'
+  // #swagger.description = 'Handles the callback from Google OAuth and completes the authentication process'
   if (!isGoogleOAuthConfigured()) {
     return res.status(503).json({
       error: 'Google OAuth not configured',
@@ -55,10 +55,10 @@ router.get('/google/callback', (req, res, next) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-// #swagger.tags = ['Authentication']
-// #swagger.summary = 'Authentication success'
-// #swagger.description = 'Endpoint hit after successful Google OAuth authentication'
 router.get('/login/success', (req, res) => {
+  // #swagger.tags = ['Authentication']
+  // #swagger.summary = 'Authentication success'
+  // #swagger.description = 'Endpoint hit after successful Google OAuth authentication'
   if (req.user) {
     res.status(200).json({
       success: true,
@@ -96,10 +96,10 @@ router.get('/login/success', (req, res) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-// #swagger.tags = ['Authentication']
-// #swagger.summary = 'Authentication failure'
-// #swagger.description = 'Endpoint hit after failed Google OAuth authentication'
 router.get('/login/failed', (req, res) => {
+  // #swagger.tags = ['Authentication']
+  // #swagger.summary = 'Authentication failure'
+  // #swagger.description = 'Endpoint hit after failed Google OAuth authentication'
   res.status(401).json({
     success: false,
     message: 'Authentication failed. Please try again.',
@@ -118,10 +118,10 @@ router.get('/login/failed', (req, res) => {
     }
 } */
 
-// #swagger.tags = ['Authentication']
-// #swagger.summary = 'Logout user'
-// #swagger.description = 'Logs out the currently authenticated user and destroys the session'
 router.get('/logout', (req, res) => {
+  // #swagger.tags = ['Authentication']
+  // #swagger.summary = 'Logout user'
+  // #swagger.description = 'Logs out the currently authenticated user and destroys the session'
   if (req.user) {
     const userName = req.user.displayName;
     req.logout((err) => {
@@ -163,10 +163,10 @@ router.get('/logout', (req, res) => {
     schema: { $ref: '#/definitions/Error' }
 } */
 
-// #swagger.tags = ['Authentication']
-// #swagger.summary = 'Check authentication status'
-// #swagger.description = 'Check if the current user is authenticated and return their basic information'
 router.get('/status', (req, res) => {
+  // #swagger.tags = ['Authentication']
+  // #swagger.summary = 'Check authentication status'
+  // #swagger.description = 'Check if the current user is authenticated and return their basic information'
   const oauthConfigured = isGoogleOAuthConfigured();
   
   if (req.user) {

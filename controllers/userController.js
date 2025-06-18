@@ -2,6 +2,30 @@ const db = require('../models');
 const User = db.users;
 const Recipe = db.recipes;
 
+// @desc    Get all users
+// @route   GET /users
+// @access  Public
+const getAllUsers = async (req, res) => {
+  try {
+    // Get all users with limited information for privacy
+    const users = await User.find({})
+      .select('_id displayName firstName lastName profileImageUrl createdAt')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: 'Users retrieved successfully',
+      count: users.length,
+      users: users
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve users',
+      details: error.message
+    });
+  }
+};
+
 // @desc    Get current user profile
 // @route   GET /users/me
 // @access  Protected
@@ -157,6 +181,7 @@ const deleteUserAccount = async (req, res) => {
 }
 
 module.exports = {
+  getAllUsers,
   getCurrentUser,
   getUserRecipes,
   updateUserProfile,

@@ -67,7 +67,7 @@
   "paths": {
     "/": {
       "get": {
-        "description": "",
+        "description": "Returns a welcome message for the Digital Recipe Box API",
         "responses": {
           "200": {
             "description": "OK",
@@ -94,29 +94,20 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
-      },
-      "post": {
-        "description": "",
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
+        },
+        "tags": [
+          "General"
+        ],
+        "summary": "API Welcome Message"
       }
     },
     "/auth/google": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Initiate Google OAuth login",
+        "description": "Redirects user to Google OAuth consent screen to begin authentication process",
         "responses": {
           "400": {
             "description": "Bad Request"
@@ -129,7 +120,11 @@
     },
     "/auth/google/callback": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Google OAuth callback",
+        "description": "Handles the callback from Google OAuth and completes the authentication process",
         "responses": {
           "503": {
             "description": "Service Unavailable"
@@ -139,7 +134,11 @@
     },
     "/auth/login/success": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authentication success",
+        "description": "Endpoint hit after successful Google OAuth authentication",
         "responses": {
           "200": {
             "description": "OK"
@@ -152,7 +151,11 @@
     },
     "/auth/login/failed": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authentication failure",
+        "description": "Endpoint hit after failed Google OAuth authentication",
         "responses": {
           "401": {
             "description": "Unauthorized"
@@ -162,7 +165,11 @@
     },
     "/auth/logout": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logout user",
+        "description": "Logs out the currently authenticated user and destroys the session",
         "responses": {
           "200": {
             "description": "OK"
@@ -178,7 +185,11 @@
     },
     "/auth/status": {
       "get": {
-        "description": "",
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Check authentication status",
+        "description": "Check if the current user is authenticated and return their basic information",
         "responses": {
           "200": {
             "description": "OK"
@@ -186,9 +197,30 @@
         }
       }
     },
+    "/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get all users",
+        "description": "Get a list of all users in the system with basic profile information. Returns public profile data only for privacy.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/users/me": {
       "get": {
-        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user profile",
+        "description": "Get the profile information of the currently authenticated user",
         "responses": {
           "200": {
             "description": "OK"
@@ -199,18 +231,28 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       }
     },
     "/users/{id}/recipes": {
       "get": {
-        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user recipes",
+        "description": "Get all public recipes created by a specific user",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "User ID"
           }
         ],
         "responses": {
@@ -228,36 +270,26 @@
     },
     "/users/{id}": {
       "put": {
-        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user profile",
+        "description": "Update the profile information of a specific user. Users can update their own profile information including display name, first name, last name, email, and profile image URL.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "User ID"
           },
           {
             "name": "body",
             "in": "body",
+            "description": "User profile data to update",
+            "required": true,
             "schema": {
-              "type": "object",
-              "properties": {
-                "displayName": {
-                  "example": "any"
-                },
-                "firstName": {
-                  "example": "any"
-                },
-                "lastName": {
-                  "example": "any"
-                },
-                "email": {
-                  "example": "any"
-                },
-                "profileImageUrl": {
-                  "example": "any"
-                }
-              }
+              "$ref": "#/definitions/UserUpdateInput"
             }
           }
         ],
@@ -268,25 +300,32 @@
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "404": {
             "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       },
       "delete": {
-        "description": "",
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete user account",
+        "description": "Permanently delete a user account. This action cannot be undone and will remove all user data from the system.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "User ID"
           }
         ],
         "responses": {
@@ -296,21 +335,27 @@
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "404": {
             "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       }
     },
-    "/recipes/": {
+    "/recipes": {
       "get": {
-        "description": "",
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Get all public recipes",
+        "description": "Retrieve a list of all public recipes available to all users. This endpoint returns recipes that have been marked as public by their creators.",
         "responses": {
           "200": {
             "description": "OK"
@@ -321,7 +366,22 @@
         }
       },
       "post": {
-        "description": "",
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Create a new recipe",
+        "description": "Create a new recipe with ingredients, instructions, and metadata. Requires authentication. The recipe will be associated with the authenticated user.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Recipe data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecipeInput"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -329,34 +389,42 @@
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       }
     },
     "/recipes/user": {
       "get": {
-        "description": "",
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Get all user recipes",
+        "description": "Get all recipes (both public and private) owned by the authenticated user. Requires authentication.",
         "responses": {
           "200": {
             "description": "OK"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       }
     },
     "/recipes/{id}": {
       "get": {
-        "description": "",
+        "description": "Get a specific recipe by its ID",
         "parameters": [
           {
             "name": "id",
@@ -378,16 +446,34 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Get recipe by ID"
       },
       "put": {
-        "description": "",
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Update a recipe by ID",
+        "description": "Update an existing recipe. Only the recipe creator can update their own recipes. Requires authentication.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Recipe ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated recipe data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecipeInput"
+            }
           }
         ],
         "responses": {
@@ -397,9 +483,6 @@
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "403": {
             "description": "Forbidden"
           },
@@ -409,10 +492,15 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       },
       "delete": {
-        "description": "",
+        "description": "Delete a recipe and all its associated reviews",
         "parameters": [
           {
             "name": "id",
@@ -437,12 +525,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Delete recipe"
       }
     },
-    "/cookbooks/": {
+    "/cookbooks": {
       "get": {
-        "description": "",
+        "description": "Get all cookbooks owned by the authenticated user",
         "responses": {
           "200": {
             "description": "OK"
@@ -453,10 +545,29 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Get user cookbooks"
       },
       "post": {
-        "description": "",
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Create a new cookbook",
+        "description": "Create a new cookbook with a name, description, and optional recipe collection. Requires authentication. The cookbook will be associated with the authenticated user.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Cookbook data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CookbookInput"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -464,18 +575,20 @@
           "400": {
             "description": "Bad Request"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       }
     },
     "/cookbooks/{id}": {
       "get": {
-        "description": "",
+        "description": "Get a specific cookbook by its ID",
         "parameters": [
           {
             "name": "id",
@@ -494,24 +607,39 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Get cookbook by ID"
       },
       "put": {
-        "description": "",
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Update a cookbook by ID",
+        "description": "Update an existing cookbook with new name, description, or recipe collection. Only the cookbook owner can update their own cookbooks. Requires authentication.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Cookbook ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated cookbook data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CookbookInput"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
@@ -522,10 +650,15 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       },
       "delete": {
-        "description": "",
+        "description": "Delete a cookbook",
         "parameters": [
           {
             "name": "id",
@@ -550,12 +683,33 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Cookbooks"
+        ],
+        "summary": "Delete cookbook"
+      }
+    },
+    "/reviews": {
+      "get": {
+        "description": "Review management GET operation",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Review GET"
       }
     },
     "/reviews/recipe/{recipeId}": {
       "get": {
-        "description": "",
+        "description": "Get all reviews for a specific recipe",
         "parameters": [
           {
             "name": "recipeId",
@@ -577,16 +731,34 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Get recipe reviews"
       },
       "post": {
-        "description": "",
+        "tags": [
+          "Recipes"
+        ],
+        "summary": "Add a review to a recipe",
+        "description": "Add a new review to a recipe with rating and comment. Requires authentication. Users can only review public recipes and cannot review the same recipe twice.",
         "parameters": [
           {
             "name": "recipeId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Recipe ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Review data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReviewInput"
+            }
           }
         ],
         "responses": {
@@ -595,9 +767,6 @@
           },
           "400": {
             "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
@@ -611,12 +780,17 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       }
     },
     "/reviews/user": {
       "get": {
-        "description": "",
+        "description": "Get all reviews created by the authenticated user",
         "responses": {
           "200": {
             "description": "OK"
@@ -627,12 +801,16 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get user reviews"
       }
     },
     "/reviews/{id}": {
       "get": {
-        "description": "",
+        "description": "Get a specific review by its ID",
         "parameters": [
           {
             "name": "id",
@@ -654,16 +832,34 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get review by ID"
       },
       "put": {
-        "description": "",
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Update a review by ID",
+        "description": "Update an existing review. Only the review author can update their own reviews. Requires authentication.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Review ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated review data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReviewInput"
+            }
           }
         ],
         "responses": {
@@ -672,9 +868,6 @@
           },
           "400": {
             "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
@@ -685,10 +878,15 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "googleAuth": []
+          }
+        ]
       },
       "delete": {
-        "description": "",
+        "description": "Delete a review",
         "parameters": [
           {
             "name": "id",
@@ -713,285 +911,11 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
-      }
-    },
-    "/google": {
-      "get": {
-        "description": "",
-        "responses": {
-          "400": {
-            "description": "Bad Request"
-          },
-          "503": {
-            "description": "Service Unavailable"
-          }
-        }
-      }
-    },
-    "/google/callback": {
-      "get": {
-        "description": "",
-        "responses": {
-          "503": {
-            "description": "Service Unavailable"
-          }
-        }
-      }
-    },
-    "/login/success": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      }
-    },
-    "/login/failed": {
-      "get": {
-        "description": "",
-        "responses": {
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      }
-    },
-    "/logout": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/status": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/me": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/{id}/recipes": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
+        },
+        "tags": [
+          "Reviews"
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/{id}": {
-      "put": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "delete": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/user": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/recipe/{recipeId}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "recipeId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "post": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "recipeId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
+        "summary": "Delete review"
       }
     }
   },

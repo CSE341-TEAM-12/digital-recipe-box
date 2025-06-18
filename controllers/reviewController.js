@@ -1,5 +1,84 @@
 const db = require('../models');
 
+// @desc    Get all reviews
+// @route   GET /reviews
+// @access  Public
+const getAllReviews = async (req, res) => {
+  try {
+    // Get all reviews for public recipes only
+    const reviews = await db.reviews.aggregate([
+      // First lookup the recipe to check if it's public
+      {
+        $lookup: {
+          from: 'recipes',
+          localField: 'recipeId',
+          foreignField: '_id',
+          as: 'recipe'
+        }
+      },
+      // Filter for public recipes only
+      {
+        $match: {
+          'recipe.isPublic': true
+        }
+      },
+      // Lookup reviewer information
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'reviewerId',
+          foreignField: '_id',
+          as: 'reviewer'
+        }
+      },
+      // Project the fields we want
+      {
+        $project: {
+          _id: 1,
+          rating: 1,
+          comment: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          'recipe._id': 1,
+          'recipe.title': 1,
+          'recipe.description': 1,
+          'reviewer._id': 1,
+          'reviewer.displayName': 1,
+          'reviewer.firstName': 1,
+          'reviewer.lastName': 1
+        }
+      },
+      // Sort by creation date (newest first)
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
+
+    // Flatten the nested objects for cleaner response
+    const formattedReviews = reviews.map(review => ({
+      _id: review._id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+      recipeId: review.recipe[0],
+      reviewerId: review.reviewer[0]
+    }));
+
+    res.status(200).json({
+      message: 'Reviews retrieved successfully',
+      count: formattedReviews.length,
+      reviews: formattedReviews
+    });
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve reviews',
+      details: error.message
+    });
+  }
+};
+
 // Create a new review for a recipe
 const createReview = async (req, res) => {
   try {
@@ -250,6 +329,7 @@ const getUserReviews = async (req, res) => {
 };
 
 module.exports = {
+  getAllReviews,
   createReview,
   getReviewsByRecipeId,
   getReviewById,
