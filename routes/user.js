@@ -62,92 +62,40 @@ router.get('/:id/recipes', validateObjectId, userController.getUserRecipes);
     schema: { $ref: '#/definitions/Error' }
 } */
 
+// #swagger.tags = ['Users']
+// #swagger.summary = 'Update user profile'
+// #swagger.description = 'Update the profile information of a specific user. Users can update their own profile information including display name, first name, last name, email, and profile image URL.'
+// #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
+// #swagger.parameters['body'] = { in: 'body', description: 'User profile data to update', required: true, schema: { $ref: '#/definitions/UserUpdateInput' } }
 router.put('/:id', validateObjectId, userController.updateUserProfile);
-/* #swagger.parameters['id'] = {
-    in: 'path',
-    description: 'ID of the user to update',
-    required: true,
-    type: 'string'
-} */
-
-/* #swagger.requestBody = {
-    required: true,
-    content: {
-        "application/json": {
-            schema: {
-                type: 'object',
-                properties: {
-                    displayName: { type: 'string', example: 'Jane Doe' },
-                    firstName: { type: 'string', example: 'Jane' },
-                    lastName: { type: 'string', example: 'Doe' },
-                    email: { type: 'string', example: 'jane.doe@example.com' },
-                    profileImageUrl: { type: 'string', example: 'https://example.com/images/jane.jpg' }
-                }
-            }
-        }
-    }
-} */
-
 /* #swagger.responses[200] = {
     description: 'User profile updated successfully',
     schema: {
         type: 'object',
         properties: {
             message: { type: 'string', example: 'User profile updated successfully' },
-            user: {
-                type: 'object',
-                properties: {
-                    _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                    displayName: { type: 'string', example: 'Jane Doe' },
-                    firstName: { type: 'string', example: 'Jane' },
-                    lastName: { type: 'string', example: 'Doe' },
-                    email: { type: 'string', example: 'jane.doe@example.com' },
-                    profileImageUrl: { type: 'string', example: 'https://example.com/images/jane.jpg' }
-                }
-            }
+            user: { $ref: '#/definitions/User' }
         }
     }
 } */
-
 /* #swagger.responses[400] = {
-    description: 'Invalid user ID',
-    schema: {
-        type: 'object',
-        properties: {
-            error: { type: 'string', example: 'Invalid user ID' }
-        }
-    }
+    description: 'Invalid user ID or validation error',
+    schema: { $ref: '#/definitions/Error' }
 } */
-
 /* #swagger.responses[404] = {
     description: 'User not found',
-    schema: {
-        type: 'object',
-        properties: {
-            error: { type: 'string', example: 'User not found' }
-        }
-    }
+    schema: { $ref: '#/definitions/Error' }
 } */
-
 /* #swagger.responses[500] = {
     description: 'Failed to update user profile',
-    schema: {
-        type: 'object',
-        properties: {
-            error: { type: 'string', example: 'Failed to update user profile' },
-            details: { type: 'string', example: 'Error message goes here' }
-        }
-    }
+    schema: { $ref: '#/definitions/Error' }
 } */
 
+// #swagger.tags = ['Users']
+// #swagger.summary = 'Delete user account'
+// #swagger.description = 'Permanently delete a user account. This action cannot be undone and will remove all user data from the system.'
+// #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
 router.delete('/:id', validateObjectId, userController.deleteUserAccount);
-/* #swagger.parameters['id'] = {
-    in: 'path',
-    description: 'ID of the user to delete',
-    required: true,
-    type: 'string'
-} */
-
 /* #swagger.responses[200] = {
     description: 'User account deleted successfully',
     schema: {
@@ -157,37 +105,17 @@ router.delete('/:id', validateObjectId, userController.deleteUserAccount);
         }
     }
 } */
-
 /* #swagger.responses[400] = {
     description: 'Invalid user ID',
-    schema: {
-        type: 'object',
-        properties: {
-            error: { type: 'string', example: 'Invalid user ID' }
-        }
-    }
+    schema: { $ref: '#/definitions/Error' }
 } */
-
 /* #swagger.responses[404] = {
     description: 'User not found',
-    schema: {
-        type: 'object',
-        properties: {
-            error: { type: 'string', example: 'User not found' }
-        }
-    }
+    schema: { $ref: '#/definitions/Error' }
 } */
-
 /* #swagger.responses[500] = {
     description: 'Failed to delete user account',
-    schema: {
-        type: 'object',
-        properties: {
-            error: { type: 'string', example: 'Failed to delete user account' },
-            details: { type: 'string', example: 'Error message goes here' }
-        }
-    }
+    schema: { $ref: '#/definitions/Error' }
 } */
-
 
 module.exports = router;
