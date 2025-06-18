@@ -65,9 +65,10 @@ router.get('/:id/recipes', validateObjectId, userController.getUserRecipes);
 // #swagger.tags = ['Users']
 // #swagger.summary = 'Update user profile'
 // #swagger.description = 'Update the profile information of a specific user. Users can update their own profile information including display name, first name, last name, email, and profile image URL.'
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
 // #swagger.parameters['body'] = { in: 'body', description: 'User profile data to update', required: true, schema: { $ref: '#/definitions/UserUpdateInput' } }
-router.put('/:id', validateObjectId, userController.updateUserProfile);
+router.put('/:id', authenticateUser, validateObjectId, userController.updateUserProfile);
 /* #swagger.responses[200] = {
     description: 'User profile updated successfully',
     schema: {
@@ -94,8 +95,9 @@ router.put('/:id', validateObjectId, userController.updateUserProfile);
 // #swagger.tags = ['Users']
 // #swagger.summary = 'Delete user account'
 // #swagger.description = 'Permanently delete a user account. This action cannot be undone and will remove all user data from the system.'
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'User ID', required: true, type: 'string' }
-router.delete('/:id', validateObjectId, userController.deleteUserAccount);
+router.delete('/:id', authenticateUser, validateObjectId, userController.deleteUserAccount);
 /* #swagger.responses[200] = {
     description: 'User account deleted successfully',
     schema: {

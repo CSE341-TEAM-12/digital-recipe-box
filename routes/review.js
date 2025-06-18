@@ -36,8 +36,8 @@ router.get('/recipe/:recipeId', validateRecipeId, reviewController.getReviewsByR
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Get all user reviews'
 // #swagger.description = 'Get all reviews created by the authenticated user across all recipes. Requires authentication.'
-// #swagger.security = [{ "bearerAuth": [] }]
-router.get('/user', /* authenticateUser, */ reviewController.getUserReviews);
+// #swagger.security = [{ "googleAuth": [] }]
+router.get('/user', authenticateUser, reviewController.getUserReviews);
 /* #swagger.responses[200] = {
     description: 'User reviews retrieved successfully',
     schema: {
@@ -84,10 +84,10 @@ router.get('/:id', validateObjectId, reviewController.getReviewById);
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Add a review to a recipe'
 // #swagger.description = 'Add a new review to a recipe with rating and comment. Requires authentication. Users can only review public recipes and cannot review the same recipe twice.'
-// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['recipeId'] = { in: 'path', description: 'Recipe ID', required: true, type: 'string' }
 // #swagger.parameters['body'] = { in: 'body', description: 'Review data', required: true, schema: { $ref: '#/definitions/ReviewInput' } }
-router.post('/recipe/:recipeId', /* authenticateUser, */ validateRecipeId, validateReview, reviewController.createReview);
+router.post('/recipe/:recipeId', authenticateUser, validateRecipeId, validateReview, reviewController.createReview);
 /* #swagger.responses[201] = {
     description: 'Review created successfully',
     schema: {
@@ -122,10 +122,10 @@ router.post('/recipe/:recipeId', /* authenticateUser, */ validateRecipeId, valid
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Update a review by ID'
 // #swagger.description = 'Update an existing review. Only the review author can update their own reviews. Requires authentication.'
-// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'Review ID', required: true, type: 'string' }
 // #swagger.parameters['body'] = { in: 'body', description: 'Updated review data', required: true, schema: { $ref: '#/definitions/ReviewInput' } }
-router.put('/:id', /* authenticateUser, */ validateObjectId, validateReview, reviewController.updateReview);
+router.put('/:id', authenticateUser, validateObjectId, validateReview, reviewController.updateReview);
 /* #swagger.responses[200] = {
     description: 'Review updated successfully',
     schema: {
@@ -156,9 +156,9 @@ router.put('/:id', /* authenticateUser, */ validateObjectId, validateReview, rev
 // #swagger.tags = ['Reviews']
 // #swagger.summary = 'Delete a review by ID'
 // #swagger.description = 'Delete a review. Only the review author can delete their own reviews. Requires authentication.'
-// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'Review ID', required: true, type: 'string' }
-router.delete('/:id', /* authenticateUser, */ validateObjectId, reviewController.deleteReview);
+router.delete('/:id', authenticateUser, validateObjectId, reviewController.deleteReview);
 /* #swagger.responses[200] = {
     description: 'Review deleted successfully',
     schema: {

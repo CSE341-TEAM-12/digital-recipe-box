@@ -72,16 +72,14 @@ const getCookbookById = async (req, res) => {
       });
     }
 
-    // Check if user is the owner
-    if (cookbook.ownerId._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        error: 'Access denied. You can only access your own cookbooks.'
-      });
-    }
-
+    // If user is authenticated and is the owner, they can see all details
+    // If user is not authenticated or not the owner, they can still view the cookbook (public endpoint)
+    const isOwner = req.user && cookbook.ownerId._id.toString() === req.user._id.toString();
+    
     res.status(200).json({
       message: 'Cookbook retrieved successfully',
-      cookbook
+      cookbook,
+      isOwner: isOwner
     });
   } catch (error) {
     console.error('Error fetching cookbook:', error);

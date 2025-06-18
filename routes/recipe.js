@@ -29,8 +29,8 @@ router.get('/', recipeController.getPublicRecipes);
 // #swagger.tags = ['Recipes']
 // #swagger.summary = 'Get all user recipes'
 // #swagger.description = 'Get all recipes (both public and private) owned by the authenticated user. Requires authentication.'
-// #swagger.security = [{ "bearerAuth": [] }]
-router.get('/user', /* authenticateUser, */ recipeController.getUserRecipes);
+// #swagger.security = [{ "googleAuth": [] }]
+router.get('/user', authenticateUser, recipeController.getUserRecipes);
 /* #swagger.responses[200] = {
     description: 'User recipes retrieved successfully',
     schema: {
@@ -77,9 +77,9 @@ router.get('/:id', validateObjectId, recipeController.getRecipeById);
 // #swagger.tags = ['Recipes']
 // #swagger.summary = 'Create a new recipe'
 // #swagger.description = 'Create a new recipe with ingredients, instructions, and metadata. Requires authentication. The recipe will be associated with the authenticated user.'
-// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['body'] = { in: 'body', description: 'Recipe data', required: true, schema: { $ref: '#/definitions/RecipeInput' } }
-router.post('/', /* authenticateUser, */ validateRecipe, recipeController.createRecipe);
+router.post('/', authenticateUser, validateRecipe, recipeController.createRecipe);
 /* #swagger.responses[201] = {
     description: 'Recipe created successfully',
     schema: {
@@ -102,10 +102,10 @@ router.post('/', /* authenticateUser, */ validateRecipe, recipeController.create
 // #swagger.tags = ['Recipes']
 // #swagger.summary = 'Update a recipe by ID'
 // #swagger.description = 'Update an existing recipe. Only the recipe creator can update their own recipes. Requires authentication.'
-// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'Recipe ID', required: true, type: 'string' }
 // #swagger.parameters['body'] = { in: 'body', description: 'Updated recipe data', required: true, schema: { $ref: '#/definitions/RecipeInput' } }
-router.put('/:id', /* authenticateUser, */ validateObjectId, validateRecipe, recipeController.updateRecipe);
+router.put('/:id', authenticateUser, validateObjectId, validateRecipe, recipeController.updateRecipe);
 /* #swagger.responses[200] = {
     description: 'Recipe updated successfully',
     schema: {
@@ -136,9 +136,9 @@ router.put('/:id', /* authenticateUser, */ validateObjectId, validateRecipe, rec
 // #swagger.tags = ['Recipes']
 // #swagger.summary = 'Delete a recipe by ID'
 // #swagger.description = 'Delete a recipe and all its associated reviews. Only the recipe creator can delete their own recipes. Requires authentication.'
-// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.security = [{ "googleAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'Recipe ID', required: true, type: 'string' }
-router.delete('/:id', /* authenticateUser, */ validateObjectId, recipeController.deleteRecipe);
+router.delete('/:id', authenticateUser, validateObjectId, recipeController.deleteRecipe);
 /* #swagger.responses[200] = {
     description: 'Recipe deleted successfully',
     schema: {
