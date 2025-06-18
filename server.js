@@ -17,6 +17,9 @@ db.connectDB();
 // Configure Passport
 require('./config/passport')(passport);
 
+// Trust Render's Proxy
+app.set('trust proxy', 1);
+
 // Session Configuration
 app.use(session({
   store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI}),
