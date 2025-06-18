@@ -1,6 +1,7 @@
 const db = require('../models');
 const User = db.users;
 const Recipe = db.recipes;
+const mongoose = require('mongoose');
 
 // @desc    Get all users
 // @route   GET /users
@@ -110,7 +111,7 @@ const updateUserProfile = async (req, res) => {
     const {displayName, firstName, lastName, email, profileImageUrl} = req.body;
 
     // Validate user ID
-    if (!id || !db.isValidObjectId(id)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         error: 'Invalid user ID'
       });
@@ -151,7 +152,7 @@ const deleteUserAccount = async (req, res) => {
     const { id } = req.params;
 
     // Validate user ID
-    if (!id || !db.isValidObjectId(id)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         error: 'Invalid user ID'
       });

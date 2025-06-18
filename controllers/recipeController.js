@@ -1,4 +1,5 @@
 const db = require('../models');
+const mongoose = require('mongoose');
 
 // Create a new recipe
 const createRecipe = async (req, res) => {
@@ -60,6 +61,13 @@ const getPublicRecipes = async (req, res) => {
 // Get a single recipe by ID
 const getRecipeById = async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        error: 'Invalid recipe ID format'
+      });
+    }
+
     const recipe = await db.recipes.findById(req.params.id)
       .populate('creatorId', 'displayName firstName lastName');
 
@@ -92,6 +100,13 @@ const getRecipeById = async (req, res) => {
 // Update a recipe by ID
 const updateRecipe = async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        error: 'Invalid recipe ID format'
+      });
+    }
+
     const recipe = await db.recipes.findById(req.params.id);
 
     if (!recipe) {
@@ -138,6 +153,13 @@ const updateRecipe = async (req, res) => {
 // Delete a recipe by ID
 const deleteRecipe = async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        error: 'Invalid recipe ID format'
+      });
+    }
+
     const recipe = await db.recipes.findById(req.params.id);
 
     if (!recipe) {

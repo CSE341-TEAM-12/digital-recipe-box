@@ -1,4 +1,5 @@
 const db = require('../models');
+const mongoose = require('mongoose');
 
 // @desc    Get all reviews
 // @route   GET /reviews
@@ -192,6 +193,13 @@ const getReviewsByRecipeId = async (req, res) => {
 // Get a single review by ID
 const getReviewById = async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        error: 'Invalid review ID format'
+      });
+    }
+
     const review = await db.reviews.findById(req.params.id)
       .populate('reviewerId', 'displayName firstName lastName')
       .populate('recipeId', 'title description');
@@ -226,6 +234,13 @@ const getReviewById = async (req, res) => {
 // Update a review by ID
 const updateReview = async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        error: 'Invalid review ID format'
+      });
+    }
+
     const review = await db.reviews.findById(req.params.id);
 
     if (!review) {
@@ -273,6 +288,13 @@ const updateReview = async (req, res) => {
 // Delete a review by ID
 const deleteReview = async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        error: 'Invalid review ID format'
+      });
+    }
+
     const review = await db.reviews.findById(req.params.id);
 
     if (!review) {

@@ -1,4 +1,5 @@
 const db = require('../models');
+const mongoose = require('mongoose');
 
 // Create a new cookbook
 const createCookbook = async (req, res) => {
@@ -62,6 +63,13 @@ const getUserCookbooks = async (req, res) => {
 // Get a single cookbook by ID
 const getCookbookById = async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        error: 'Invalid cookbook ID format'
+      });
+    }
+
     const cookbook = await db.cookbooks.findById(req.params.id)
       .populate('ownerId', 'displayName firstName lastName')
       .populate('recipeIds', 'title description isPublic creatorId');
@@ -95,6 +103,13 @@ const updateCookbook = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        error: 'Invalid cookbook ID format'
+      });
+    }
+
     // Find the cookbook and check ownership
     const cookbook = await db.cookbooks.findById(id);
     if (!cookbook) {
@@ -127,6 +142,13 @@ const updateCookbook = async (req, res) => {
 const deleteCookbook = async (req, res) => {
   try{
     const { id } = req.params;
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        error: 'Invalid cookbook ID format'
+      });
+    }
 
     // Find the cookbook and check ownership
     const cookbook = await db.cookbooks.findById(id);
