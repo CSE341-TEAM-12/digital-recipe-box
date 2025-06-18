@@ -80,7 +80,85 @@ const getUserRecipes = async (req, res) => {
   }
 };
 
+const updateUserProfile = async (req, res) => {
+  try{
+    const { id } = req.params;
+    const {displayName, firstName, lastName, email, profileImageUrl} = req.body;
+
+    // Validate user ID
+    if (!id || !db.isValidObjectId(id)) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+    // Find user by ID
+    const user  = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    } else {
+      // Update user profile
+      user.displayName = displayName || user.displayName;
+      user.firstName = firstName || user.firstName;
+      user.lastName = lastName || user.lastName;
+      user.email = email || user.email;
+      user.profileImageUrl = profileImageUrl || user.profileImageUrl;
+
+      // Save updated user
+      await user.save();
+
+      res.status(200).json({
+        message: 'User profile updated successfully',
+        user
+      });
+    }
+  }catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({
+      error: 'Failed to update user profile',
+      details: error.message
+    });
+  }
+}
+
+const deleteUserAccount = async (req, res) => {
+  try{
+    const { id } = req.params;
+
+    // Validate user ID
+    if (!id || !db.isValidObjectId(id)) {
+      return res.status(400).json({
+        error: 'Invalid user ID'
+      });
+    }
+
+    // Find user by ID
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    // Delete user account
+    await User.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: 'User account deleted successfully'
+    });
+  }catch (error) {
+    console.error('Error deleting user account:', error);
+    res.status(500).json({
+      error: 'Failed to delete user account',
+      details: error.message
+    });
+  }
+}
+
 module.exports = {
   getCurrentUser,
-  getUserRecipes
+  getUserRecipes,
+  updateUserProfile,
+  deleteUserAccount
 }; 
