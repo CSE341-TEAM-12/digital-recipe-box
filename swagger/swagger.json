@@ -49,13 +49,7 @@
         "profile": "Access to user profile information",
         "email": "Access to user email address"
       },
-      "description": "Google OAuth 2.0 authentication. Use /auth/google to initiate login flow."
-    },
-    "bearerAuth": {
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header",
-      "description": "JWT token for authentication. Format: Bearer {token} (For testing purposes only)"
+      "description": "Google OAuth 2.0 authentication with session management. Use /auth/google to initiate login flow. Authentication is maintained via server-side sessions."
     }
   },
   "consumes": [
@@ -68,13 +62,7 @@
     "/": {
       "get": {
         "description": "Returns a welcome message for the Digital Recipe Box API. This endpoint can be used to check if the API is running and accessible.",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK",
@@ -206,14 +194,8 @@
     },
     "/users/me": {
       "get": {
-        "description": "Get the profile information of the currently authenticated user",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
+        "description": "Get the profile information of the currently authenticated user. Requires active Google OAuth session.",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -228,7 +210,15 @@
         "tags": [
           "Users"
         ],
-        "summary": "Get current user profile"
+        "summary": "Get current user profile",
+        "security": [
+          {
+            "googleAuth": [
+              "profile",
+              "email"
+            ]
+          }
+        ]
       }
     },
     "/users/{id}/recipes": {
@@ -276,12 +266,16 @@
         "summary": "Get all public recipes"
       },
       "post": {
-        "description": "Create a new recipe with ingredients, instructions, and metadata. Requires authentication. The recipe will be associated with the authenticated user.",
+        "description": "Create a new recipe with ingredients, instructions, and metadata. Requires authentication via Google OAuth session. The recipe will be associated with the authenticated user.",
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "description": "Recipe data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecipeInput"
+            }
           }
         ],
         "responses": {
@@ -301,7 +295,15 @@
         "tags": [
           "Recipes"
         ],
-        "summary": "Create a new recipe"
+        "summary": "Create a new recipe",
+        "security": [
+          {
+            "googleAuth": [
+              "profile",
+              "email"
+            ]
+          }
+        ]
       }
     },
     "/recipes/{id}": {
@@ -337,14 +339,8 @@
     },
     "/cookbooks/": {
       "get": {
-        "description": "Get all cookbooks owned by the authenticated user. This endpoint returns a list of cookbooks that belong to the logged-in user.",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
+        "description": "Get all cookbooks owned by the authenticated user. Requires active Google OAuth session.",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -359,15 +355,27 @@
         "tags": [
           "Cookbooks"
         ],
-        "summary": "Get all user cookbooks"
+        "summary": "Get all user cookbooks",
+        "security": [
+          {
+            "googleAuth": [
+              "profile",
+              "email"
+            ]
+          }
+        ]
       },
       "post": {
-        "description": "Create a new cookbook with a name, description, and optional recipe collection. Requires authentication. The cookbook will be associated with the authenticated user.",
+        "description": "Create a new cookbook with a name, description, and optional recipe collection. Requires authentication via Google OAuth session. The cookbook will be associated with the authenticated user.",
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "description": "Cookbook data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CookbookInput"
+            }
           }
         ],
         "responses": {
@@ -387,22 +395,25 @@
         "tags": [
           "Cookbooks"
         ],
-        "summary": "Create a new cookbook"
+        "summary": "Create a new cookbook",
+        "security": [
+          {
+            "googleAuth": [
+              "profile",
+              "email"
+            ]
+          }
+        ]
       }
     },
     "/cookbooks/{id}": {
       "get": {
-        "description": "Get a specific cookbook by its ID. User must be the owner of the cookbook to access it.",
+        "description": "Get a specific cookbook by its ID. User must be authenticated via Google OAuth session and be the owner of the cookbook to access it.",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
             "type": "string"
           }
         ],
@@ -426,7 +437,15 @@
         "tags": [
           "Cookbooks"
         ],
-        "summary": "Get a single cookbook by ID"
+        "summary": "Get a single cookbook by ID",
+        "security": [
+          {
+            "googleAuth": [
+              "profile",
+              "email"
+            ]
+          }
+        ]
       }
     },
     "/reviews/recipe/{recipeId}": {
@@ -460,7 +479,7 @@
         "summary": "Get all reviews for a recipe"
       },
       "post": {
-        "description": "Add a new review to a recipe with rating and comment. Requires authentication. Users can only review public recipes and cannot review the same recipe twice.",
+        "description": "Add a new review to a recipe with rating and comment. Requires authentication via Google OAuth session. Users can only review public recipes and cannot review the same recipe twice.",
         "parameters": [
           {
             "name": "recipeId",
@@ -469,9 +488,13 @@
             "type": "string"
           },
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "description": "Review data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReviewInput"
+            }
           }
         ],
         "responses": {
@@ -500,7 +523,15 @@
         "tags": [
           "Reviews"
         ],
-        "summary": "Add a review to a recipe"
+        "summary": "Add a review to a recipe",
+        "security": [
+          {
+            "googleAuth": [
+              "profile",
+              "email"
+            ]
+          }
+        ]
       }
     }
   },
