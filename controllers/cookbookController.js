@@ -92,8 +92,74 @@ const getCookbookById = async (req, res) => {
   }
 };
 
+const updateCookbook = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Find the cookbook and check ownership
+    const cookbook = await db.cookbooks.findById(id);
+    if (!cookbook) {
+      return res.status(404).json({ error: 'Cookbook not found' });
+    }
+
+    if (cookbook.ownerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Access denied. You can only update your own cookbooks.' });
+    }
+
+    // Update the cookbook
+    const updatedCookbook = await db.cookbooks.findByIdAndUpdate(id, updateData, { new: true })
+      .populate('ownerId', 'displayName firstName lastName')
+      .populate('recipeIds', 'title description isPublic');
+
+    res.status(200).json({
+      message: 'Cookbook updated successfully',
+      cookbook: updatedCookbook
+    });
+  } catch (error) {
+    console.error('Error updating cookbook:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to update cookbook'
+    });
+  }
+    
+}
+
+const deleteCookbook = async (req, res) => {
+  try{
+    const { id } = req.params;
+
+    // Find the cookbook and check ownership
+    const cookbook = await db.cookbooks.findById(id);
+    if (!cookbook) {
+      return res.status(404).json({ error: 'Cookbook not found' });
+    }
+
+    if (cookbook.ownerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Access denied. You can only delete your own cookbooks.' });
+    }
+
+    // Delete the cookbook
+    await db.cookbooks.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: 'Cookbook deleted successfully'
+    });
+  }catch (error) {
+    console.error('Error deleting cookbook:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Failed to delete cookbook'
+    });
+  }
+}
+
+
 module.exports = {
   createCookbook,
   getUserCookbooks,
-  getCookbookById
+  getCookbookById,
+  updateCookbook,
+  deleteCookbook
 }; 

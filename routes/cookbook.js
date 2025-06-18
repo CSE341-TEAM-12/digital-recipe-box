@@ -80,5 +80,8 @@ router.post('/', authenticateUser, validateCookbook, cookbookController.createCo
     description: 'Authentication required',
     schema: { $ref: '#/definitions/Error' }
 } */
+router.put('./:id', authenticateUser, validateCookbook, cookbookController.updateCookbook);
+router.delete('./:id', authenticateUser, validateObjectId, cookbookController.deleteCookbook);
+
 
 module.exports = router;
