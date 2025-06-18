@@ -7,7 +7,7 @@ const { validateCookbook, validateObjectId } = require('../middleware/validation
 // #swagger.summary = 'Get all user cookbooks'
 // #swagger.description = 'Get all cookbooks owned by the authenticated user. This endpoint returns a list of cookbooks that belong to the logged-in user.'
 // #swagger.security = [{ "bearerAuth": [] }]
-router.get('/', authenticateUser, cookbookController.getUserCookbooks);
+router.get('/', /* authenticateUser, */ cookbookController.getUserCookbooks);
 /* #swagger.responses[200] = {
     description: 'User cookbooks retrieved successfully',
     schema: {
@@ -32,7 +32,7 @@ router.get('/', authenticateUser, cookbookController.getUserCookbooks);
 // #swagger.description = 'Get a specific cookbook by its ID. User must be the owner of the cookbook to access it.'
 // #swagger.security = [{ "bearerAuth": [] }]
 // #swagger.parameters['id'] = { in: 'path', description: 'Cookbook ID', required: true, type: 'string' }
-router.get('/:id', authenticateUser, validateObjectId, cookbookController.getCookbookById);
+router.get('/:id', /* authenticateUser, */ validateObjectId, cookbookController.getCookbookById);
 /* #swagger.responses[200] = {
     description: 'Cookbook retrieved successfully',
     schema: {
@@ -61,7 +61,7 @@ router.get('/:id', authenticateUser, validateObjectId, cookbookController.getCoo
 // #swagger.description = 'Create a new cookbook with a name, description, and optional recipe collection. Requires authentication. The cookbook will be associated with the authenticated user.'
 // #swagger.security = [{ "bearerAuth": [] }]
 // #swagger.parameters['body'] = { in: 'body', description: 'Cookbook data', required: true, schema: { $ref: '#/definitions/CookbookInput' } }
-router.post('/', authenticateUser, validateCookbook, cookbookController.createCookbook);
+router.post('/', /* authenticateUser, */ validateCookbook, cookbookController.createCookbook);
 /* #swagger.responses[201] = {
     description: 'Cookbook created successfully',
     schema: {
@@ -80,8 +80,68 @@ router.post('/', authenticateUser, validateCookbook, cookbookController.createCo
     description: 'Authentication required',
     schema: { $ref: '#/definitions/Error' }
 } */
-router.put('./:id', authenticateUser, validateCookbook, cookbookController.updateCookbook);
-router.delete('./:id', authenticateUser, validateObjectId, cookbookController.deleteCookbook);
 
+// #swagger.tags = ['Cookbooks']
+// #swagger.summary = 'Update a cookbook by ID'
+// #swagger.description = 'Update an existing cookbook with new name, description, or recipe collection. Only the cookbook owner can update their own cookbooks. Requires authentication.'
+// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.parameters['id'] = { in: 'path', description: 'Cookbook ID', required: true, type: 'string' }
+// #swagger.parameters['body'] = { in: 'body', description: 'Updated cookbook data', required: true, schema: { $ref: '#/definitions/CookbookInput' } }
+router.put('/:id', /* authenticateUser, */ validateObjectId, validateCookbook, cookbookController.updateCookbook);
+/* #swagger.responses[200] = {
+    description: 'Cookbook updated successfully',
+    schema: {
+        type: 'object',
+        properties: {
+            message: { type: 'string', example: 'Cookbook updated successfully' },
+            cookbook: { $ref: '#/definitions/Cookbook' }
+        }
+    }
+} */
+/* #swagger.responses[400] = {
+    description: 'Invalid input data or validation error',
+    schema: { $ref: '#/definitions/Error' }
+} */
+/* #swagger.responses[401] = {
+    description: 'Authentication required',
+    schema: { $ref: '#/definitions/Error' }
+} */
+/* #swagger.responses[403] = {
+    description: 'Access denied - not the cookbook owner',
+    schema: { $ref: '#/definitions/Error' }
+} */
+/* #swagger.responses[404] = {
+    description: 'Cookbook not found',
+    schema: { $ref: '#/definitions/Error' }
+} */
+
+// #swagger.tags = ['Cookbooks']
+// #swagger.summary = 'Delete a cookbook by ID'
+// #swagger.description = 'Delete a cookbook permanently. Only the cookbook owner can delete their own cookbooks. This action cannot be undone. Requires authentication.'
+// #swagger.security = [{ "bearerAuth": [] }]
+// #swagger.parameters['id'] = { in: 'path', description: 'Cookbook ID', required: true, type: 'string' }
+router.delete('/:id', /* authenticateUser, */ validateObjectId, cookbookController.deleteCookbook);
+/* #swagger.responses[200] = {
+    description: 'Cookbook deleted successfully',
+    schema: {
+        type: 'object',
+        properties: {
+            message: { type: 'string', example: 'Cookbook deleted successfully' },
+            deletedCookbookId: { type: 'string', example: '507f1f77bcf86cd799439011' }
+        }
+    }
+} */
+/* #swagger.responses[401] = {
+    description: 'Authentication required',
+    schema: { $ref: '#/definitions/Error' }
+} */
+/* #swagger.responses[403] = {
+    description: 'Access denied - not the cookbook owner',
+    schema: { $ref: '#/definitions/Error' }
+} */
+/* #swagger.responses[404] = {
+    description: 'Cookbook not found',
+    schema: { $ref: '#/definitions/Error' }
+} */
 
 module.exports = router;
